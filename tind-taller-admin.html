@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panel admin: Tu Primera Startup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#14161C; --card:#1D2029; --line:#2E3340; --text:#F4F1EA; --body:#C3C8D4; --muted:#8A90A0;
+  --orange:#FF7A1A; --teal:#4FD1C5; --warn:#FF8A8A;
+  --mono:'JetBrains Mono','Courier New',monospace; --sans:'DM Sans',Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:18px;line-height:1.45}
+body{min-height:100vh;padding:20px 28px 40px}
+h1,h2,h3,p{margin:0}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--teal);outline-offset:2px}
+[hidden]{display:none !important}
+
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px}
+.brand{font-family:var(--mono);font-size:22px;font-weight:700}
+.brand .prompt{color:var(--teal);font-weight:500;margin-right:10px}
+.grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:1000px){.grid{grid-template-columns:1fr}}
+.col{display:grid;gap:24px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:28px}
+.card h2{font-family:var(--mono);font-size:26px;font-weight:700;margin-bottom:16px}
+.card h3{font-family:var(--mono);font-size:20px;font-weight:700;margin:22px 0 10px;color:var(--teal)}
+.muted{color:var(--muted)}
+
+.btn{background:#262B37;border:1px solid var(--line);border-radius:10px;padding:12px 18px;cursor:pointer;font-weight:500}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--orange);border-color:var(--orange);color:#14161C;font-weight:700}
+.btn.primary:hover{background:#FF8D3A}
+.btn.big{padding:18px 26px;font-size:22px}
+.ctrls{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+
+/* Reloj */
+.clock{font-family:var(--mono);font-weight:800;font-size:clamp(88px,13vw,220px);line-height:1;letter-spacing:-.03em}
+.clock.run{color:var(--orange)}
+.clock.low{color:var(--warn)}
+.clocklabel{color:var(--muted);font-size:20px;margin-bottom:4px}
+.phasenow{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline;margin:14px 0 18px}
+.phasenow b{font-size:clamp(26px,3vw,40px);line-height:1.15}
+.phasenow span{color:var(--body);font-size:20px}
+.bar{display:flex;gap:4px;height:14px}
+.seg{position:relative;background:var(--line);border-radius:7px;overflow:hidden}
+.seg i{position:absolute;inset:0 auto 0 0;width:0;background:var(--orange)}
+.phases{list-style:none;margin:22px 0 0;padding:0;display:grid;gap:6px}
+.ph{display:grid;grid-template-columns:130px 1fr auto;gap:14px;align-items:center;padding:10px 14px;border-radius:10px;border-left:4px solid transparent;color:var(--body)}
+.ph .when{font-family:var(--mono);font-size:18px;color:var(--teal)}
+.ph.done{color:var(--muted);text-decoration:line-through}
+.ph.done .when{color:var(--muted)}
+.ph.now{background:#262B37;border-left-color:var(--orange);color:var(--text);font-weight:700}
+.ph .tag{font-family:var(--mono);font-size:15px;background:var(--orange);color:#14161C;border-radius:6px;padding:2px 8px}
+.ph.mark .name::after{content:"  (evento sugerido)";color:var(--muted);font-weight:400;font-size:16px}
+
+/* Eventos */
+.badge{display:inline-block;margin-bottom:14px;background:var(--orange);color:#14161C;font-weight:700;border-radius:999px;padding:6px 16px;animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.55}}
+.evctrl{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px}
+select{background:#14161C;border:1px solid var(--line);border-radius:10px;padding:12px 14px;max-width:100%}
+.current{margin-top:18px;border:1px solid var(--line);border-radius:12px;padding:18px;background:#181B22}
+.current h3{margin:8px 0 6px;color:var(--text);font-size:24px}
+.tag{display:inline-block;font-family:var(--mono);font-weight:700;font-size:15px;border-radius:6px;padding:2px 10px;color:#14161C}
+.tag.ayuda{background:var(--teal)}
+.tag.perjudica{background:var(--warn)}
+.code{font-family:var(--mono);font-weight:800;color:var(--orange)}
+details{margin-top:10px;color:var(--body)}
+summary{cursor:pointer;color:var(--teal)}
+.terminal{background:#0F1116;border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-family:var(--mono);font-size:16px;display:grid;gap:6px;max-height:220px;overflow:auto}
+.terminal .t{color:var(--muted)}
+.terminal .c{color:var(--orange);font-weight:700}
+.terminal .ayuda{color:var(--teal)}
+.terminal .perjudica{color:var(--warn)}
+
+.autobox{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:0 0 16px;background:#181B22}
+.autobox .row2{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;margin-top:10px}
+.autobox label{display:inline-flex;gap:8px;align-items:center}
+.autobox input[type=checkbox]{width:20px;height:20px;accent-color:var(--orange)}
+.autobox b{font-size:19px}
+#autoInfo{margin-top:10px;color:var(--body)}
+/* Demo Day */
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.row input{width:80px;background:#14161C;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.chips{list-style:none;margin:14px 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:#262B37;border:1px solid var(--line);border-radius:999px;padding:8px 16px;cursor:pointer;font-family:var(--mono);font-size:16px}
+.chip.done{color:var(--muted);text-decoration:line-through}
+.pitchclock{font-family:var(--mono);font-weight:800;font-size:clamp(64px,7vw,110px);line-height:1;margin-top:6px}
+.pitchclock.low{color:var(--warn)}
+.pitchmsg{min-height:28px;color:var(--warn);font-weight:700}
+
+/* Anuncio en pantalla */
+.overlay{position:fixed;inset:0;z-index:50;background:#14161C;display:grid;place-items:center;padding:3.5vw 4vw;overflow:auto}
+.ovbox{max-width:1500px;width:100%;display:grid;gap:14px;animation:pop .35s ease-out}
+@keyframes pop{from{transform:scale(.96);opacity:0}to{transform:none;opacity:1}}
+.ovtag{justify-self:start;font-size:clamp(20px,2vw,32px);padding:6px 18px}
+.ovbox h2{font-family:var(--mono);font-weight:800;font-size:clamp(32px,4.4vw,70px);line-height:1.05}
+.ovdesc{font-size:clamp(20px,2.1vw,34px);line-height:1.3;color:var(--body)}
+.ovask{font-size:clamp(20px,1.8vw,30px);color:var(--text)}
+.ovcodebox{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 28px;border-top:1px solid var(--line);padding-top:14px}
+.ovcodebox span{font-size:clamp(18px,1.8vw,28px);color:var(--muted)}
+.ovcodebox strong{font-family:var(--mono);font-weight:800;color:var(--orange);font-size:clamp(52px,7vw,112px);line-height:1}
+/* Controles de alerta */
+.topbtns{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:flex-end}
+.opt2{display:inline-flex;gap:8px;align-items:center;background:#262B37;border:1px solid var(--line);border-radius:10px;padding:10px 14px;cursor:pointer}
+.opt2 input[type=checkbox]{width:18px;height:18px;accent-color:var(--orange)}
+.opt2 input[type=range]{width:90px;accent-color:var(--orange)}
+.ovtest{display:flex;flex-wrap:wrap;gap:12px;align-items:center;font-size:clamp(20px,2vw,30px);margin-top:6px}
+.ovhelp{background:#1D2029;border:1px solid var(--line);border-radius:12px;padding:16px 20px;font-size:clamp(18px,1.7vw,26px);color:var(--body)}
+.ovhelp ol{margin:8px 0 12px;padding-left:24px;display:grid;gap:6px}
+.soundstate{font-size:14px;color:var(--muted);text-align:right;margin:-8px 0 14px;min-height:20px}
+.soundstate.warn{color:var(--warn);font-weight:700}
+/* Luces del anuncio: pulsos lentos en los bordes (menos de 1 por segundo), sin destellos a pantalla completa */
+.overlay{--c:#FF4D4D}
+.overlay.good{--c:#4FD1C5}
+.ovframe,.stripe,.beacon{display:none;position:fixed;pointer-events:none}
+.overlay.lights .ovframe{display:block;inset:0;box-shadow:inset 0 0 0 10px var(--c),inset 0 0 140px 30px var(--c);opacity:.85;animation:framepulse 1.3s ease-in-out 7}
+.overlay.lights .stripe{display:block;left:0;right:0;top:0;height:20px;background:repeating-linear-gradient(45deg,#FFC400 0 20px,#14161C 20px 40px);background-size:56px 56px;animation:stripes 3s linear 3}
+.overlay.good.lights .stripe{background:repeating-linear-gradient(45deg,var(--c) 0 20px,#14161C 20px 40px);background-size:56px 56px}
+.overlay.lights .beacon{display:block;top:34px;width:54px;height:54px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,var(--c) 45%,transparent 72%);box-shadow:0 0 38px 10px var(--c);opacity:.95}
+.overlay.lights .beacon.l{left:3vw;animation:beaconA 1.3s ease-in-out 7}
+.overlay.lights .beacon.r{right:3vw;animation:beaconB 1.3s ease-in-out 7}
+@keyframes framepulse{0%,100%{opacity:.35}50%{opacity:1}}
+@keyframes stripes{to{background-position:56px 0}}
+@keyframes beaconA{0%,100%{opacity:1}50%{opacity:.25}}
+@keyframes beaconB{0%,100%{opacity:.25}50%{opacity:1}}
+@media (max-height:820px){.overlay{padding:2vw 4vw}.ovbox{gap:10px}.ovbox h2{font-size:clamp(26px,3.4vw,50px)}.ovdesc{font-size:clamp(17px,1.7vw,26px)}.ovask{font-size:clamp(17px,1.5vw,24px)}.ovcodebox strong{font-size:clamp(40px,5.2vw,80px)}.ovtimer{font-size:clamp(22px,2.5vw,38px)}.ovch{font-size:clamp(17px,1.7vw,26px)}}
+/* Aviso previo al final de cada fase */
+.warnrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:16px}
+.warnbar{position:fixed;top:0;left:0;right:0;z-index:70;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:14px 28px;background:#FFC400;color:#14161C;border-bottom:6px solid #14161C}
+.warnbar.last{background:#FF6B6B}
+.warnbar.lights{animation:wbpulse 1.4s ease-in-out infinite}
+.warnbar .wbtxt{display:flex;flex-direction:column;gap:4px}
+.warnbar b{font-family:var(--mono);font-size:clamp(26px,3.6vw,56px);line-height:1.05}
+.warnbar span{font-size:clamp(18px,2vw,32px);font-weight:500}
+.warnbar .btn{background:#14161C;color:#FFFFFF;border-color:#14161C}
+@keyframes wbpulse{0%,100%{filter:brightness(1)}50%{filter:brightness(.82)}}
+@media (prefers-reduced-motion:reduce){.warnbar.lights{animation:none}}
+/* Desafío del evento en pantalla */
+.ovch{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;font-size:clamp(20px,2vw,32px)}
+.ovch b{font-family:var(--mono)}
+.ovrole{background:var(--orange)}
+.ovnote{color:var(--muted);font-size:clamp(18px,1.8vw,28px)}
+.ovtimer{margin:0;font-family:var(--mono);font-weight:800;font-size:clamp(26px,3.2vw,50px);line-height:1}
+.ovtimer.low,.curtimer.low{color:var(--warn)}
+.ovteams .tt{margin:0 0 8px;font-size:clamp(18px,1.8vw,28px);color:var(--body)}
+.ovteams .tc,.current .tc{display:flex;flex-wrap:wrap;gap:8px}
+.ovteams .chip{font-size:clamp(15px,1.5vw,24px);padding:8px 18px}
+.curtimer{font-family:var(--mono);font-weight:800;font-size:20px;margin:8px 0 0}
+.current .tt{margin:10px 0 6px;color:var(--body)}
+@media (prefers-reduced-motion:reduce){.badge,.ovbox,.overlay.lights .ovframe,.overlay.lights .stripe,.overlay.lights .beacon{animation:none !important}}
+</style>
+</head>
+<body>
+<div id="warnBar" class="warnbar" hidden role="alert">
+  <div class="wbtxt"><b id="wbTitle"></b><span id="wbSub"></span></div>
+  <button id="wbClose" class="btn" type="button">Cerrar aviso</button>
+</div>
+<header class="top">
+  <h1 class="brand"><span class="prompt">tind@taller:~$</span>panel-admin</h1>
+  <div class="topbtns">
+    <label class="opt2" title="Suena una sirena en los eventos que perjudican y una campanita en los que ayudan"><input type="checkbox" id="optSound"> Sonido</label>
+    <label class="opt2" title="Volumen de la alerta">Volumen <input type="range" id="optVol" min="10" max="100" value="60" aria-label="Volumen de la alerta"></label>
+    <label class="opt2" title="Repite el sonido cada 6 segundos, hasta 3 veces, mientras el anuncio siga abierto"><input type="checkbox" id="optRepeat"> Repetir</label>
+    <label class="opt2" title="Pulsos lentos en los bordes, menos de uno por segundo"><input type="checkbox" id="optLights"> Luces</label>
+    <button id="btnTest" class="btn" type="button">Probar alerta</button>
+    <button id="btnFull" class="btn" type="button">Pantalla completa</button>
+  </div>
+</header>
+<p id="soundState" class="soundstate" role="status" aria-live="polite"></p>
+
+<main class="grid">
+  <div class="col">
+    <section class="card" aria-label="Reloj del taller">
+      <p class="clocklabel">Tiempo restante</p>
+      <div id="clock" class="clock" role="timer" aria-live="off">60:00</div>
+      <div class="phasenow"><b id="phaseName">Listos para empezar</b><span id="phaseNext"></span></div>
+      <div id="bar" class="bar" aria-hidden="true"></div>
+      <div class="ctrls">
+        <button id="btnToggle" class="btn primary big" type="button">Iniciar</button>
+        <button id="btnNext" class="btn" type="button">Saltar a la siguiente fase</button>
+        <button id="btnGain" class="btn" type="button">Dar 1 min más</button>
+        <button id="btnLose" class="btn" type="button">Quitar 1 min</button>
+        <button id="btnReset" class="btn" type="button">Reiniciar todo</button>
+      </div>
+      <div class="warnrow">
+        <label class="opt2" title="Suena una alarma y aparece un aviso cuando falte poco para terminar la fase"><input type="checkbox" id="warnOn"> Avisar antes de que termine cada fase</label>
+        <label class="opt2">Anticipación
+          <select id="warnMin" aria-label="Minutos de anticipación"><option value="1">1 minuto</option><option value="2">2 minutos</option><option value="3">3 minutos</option></select>
+        </label>
+        <button id="btnWarnTest" class="btn" type="button">Probar aviso</button>
+      </div>
+      <ol id="phases" class="phases"></ol>
+    </section>
+  </div>
+
+  <div class="col">
+    <section class="card" aria-label="Eventos">
+      <h2>Eventos del mercado</h2>
+      <div id="slotBadge" class="badge" hidden></div>
+      <p class="muted" style="margin-bottom:14px">El anuncio sale en pantalla completa con un código; cada equipo lo escribe en su página. Puedes lanzar los eventos a mano o dejar que salgan solos.</p>
+      <div class="autobox">
+        <label><input type="checkbox" id="autoOn"><b>Lanzar eventos automáticamente</b></label>
+        <div class="row2">
+          <label for="autoStart">Desde el minuto</label>
+          <select id="autoStart"><option value="20">20</option><option value="25">25</option><option value="30">30</option><option value="35">35</option></select>
+          <label for="autoEvery">cada</label>
+          <select id="autoEvery"><option value="5">5 min</option><option value="8">8 min</option><option value="10">10 min</option><option value="12">12 min</option><option value="15">15 min</option></select>
+          <label for="autoMax">máximo</label>
+          <select id="autoMax"><option value="1">1 evento</option><option value="2">2 eventos</option><option value="3">3 eventos</option><option value="4">4 eventos</option></select>
+        </div>
+        <p id="autoInfo" aria-live="polite"></p>
+      </div>
+      <div class="evctrl">
+        <select id="filter" aria-label="Tipo de evento">
+          <option value="todos">Cualquier tipo</option>
+          <option value="ayuda">Solo los que ayudan</option>
+          <option value="perjudica">Solo los que perjudican</option>
+        </select>
+        <button id="btnRandom" class="btn primary big" type="button">Lanzar evento aleatorio</button>
+      </div>
+      <div class="evctrl">
+        <select id="pick" aria-label="Elegir un evento"></select>
+        <button id="btnPick" class="btn" type="button">Lanzar este</button>
+      </div>
+      <div class="evctrl"><label for="chLimit">Tiempo para el desafío</label>
+        <select id="chLimit"><option value="0">Sin límite</option><option value="2">2 minutos</option><option value="3">3 minutos</option><option value="5">5 minutos</option></select></div>
+      <div id="current" class="current"></div>
+      <h3>Registro</h3>
+      <div id="log" class="terminal"></div>
+    </section>
+
+    <section class="card" aria-label="Demo Day">
+      <h2>Demo Day</h2>
+      <div class="row">
+        <label for="nTeams">Equipos</label>
+        <input id="nTeams" type="number" min="2" max="12" value="7">
+        <button id="btnShuffle" class="btn" type="button">Sortear orden</button>
+      </div>
+      <ol id="order" class="chips"></ol>
+      <div id="pitchClock" class="pitchclock" role="timer" aria-live="off">01:00</div>
+      <p id="pitchMsg" class="pitchmsg" aria-live="polite"></p>
+      <div class="ctrls" style="margin-top:6px">
+        <button id="btnPitch" class="btn primary" type="button">Iniciar pitch</button>
+        <button id="btnPitchReset" class="btn" type="button">Reiniciar pitch</button>
+      </div>
+    </section>
+
+    <section class="card" aria-label="Ayuda para becarios">
+      <h2>Para becarios</h2>
+      <p class="muted" style="margin-bottom:10px">No proyectar esta tarjeta. Sirve para destrabar a un equipo que se atoró.</p>
+      <details>
+        <summary>Código maestro y claves por equipo</summary>
+        <p style="margin:12px 0 8px">Código maestro (abre cualquier ronda): <span class="code" id="masterCode"></span></p>
+        <div class="terminal" id="keysTable" style="max-height:340px;white-space:pre;font-size:14px"></div>
+      </details>
+      <details>
+        <summary>Claves de los eventos de un equipo</summary>
+        <div class="evctrl" style="margin-top:10px"><label for="keyTeam">Equipo</label><select id="keyTeam" aria-label="Equipo"></select></div>
+        <div class="terminal" id="evKeysTable" style="max-height:340px;white-space:pre;font-size:14px"></div>
+      </details>
+      <details>
+        <summary>Códigos de las misiones de un equipo</summary>
+        <div class="evctrl" style="margin-top:10px"><label for="misTeam">Equipo</label><select id="misTeam" aria-label="Equipo"></select></div>
+        <div class="terminal" id="misKeysTable" style="max-height:340px;white-space:pre;font-size:14px"></div>
+      </details>
+      <p class="muted" style="margin-top:14px">Para reiniciar un dispositivo: el botón “Reiniciar todo” de su página, o escribir REINICIO en el botón ⚡ Evento.</p>
+    </section>
+  </div>
+</main>
+
+<div id="overlay" class="overlay" hidden role="dialog" aria-modal="true" aria-labelledby="ovTitle">
+  <div class="ovframe" aria-hidden="true"></div>
+  <div class="stripe" aria-hidden="true"></div>
+  <i class="beacon l" aria-hidden="true"></i>
+  <i class="beacon r" aria-hidden="true"></i>
+  <div class="ovbox">
+    <span id="ovTag" class="tag ovtag"></span>
+    <h2 id="ovTitle"></h2>
+    <p id="ovDesc" class="ovdesc"></p>
+    <div id="ovChallenge" class="ovch" hidden><span id="ovRole" class="tag ovtag ovrole"></span><b id="ovChTitle"></b><span id="ovChNote" class="ovnote"></span></div>
+    <p class="ovask">Cuando tengan la clave, Producto decide: <b id="ovAsk"></b></p>
+    <div class="ovcodebox"><span>En tu página toca ⚡ Evento y escribe este código:</span><strong id="ovCode"></strong></div>
+    <p id="ovTimer" class="ovtimer" hidden></p>
+    <div id="ovTeams" class="ovteams" hidden></div>
+    <div id="ovTest" class="ovtest" hidden><span>¿Escuchaste la alerta?</span><button id="ovHeard" class="btn primary" type="button">Sí, se escuchó</button><button id="ovNoHeard" class="btn" type="button">No se escuchó</button></div>
+    <div id="ovHelp" class="ovhelp" hidden><b>Si no se escucha, revisa esto:</b><ol><li>Quita el silencio del equipo y sube el volumen del sistema al máximo.</li><li>Revisa que la pestaña no esté silenciada (busca el ícono de bocina en la pestaña).</li><li>Si usas proyector o HDMI, elige en el sistema la salida de audio de las bocinas del salón.</li><li>En iPhone o iPad, apaga el modo silencio con el interruptor lateral.</li></ol><button id="ovRetry" class="btn primary" type="button">Probar de nuevo</button></div>
+    <div><button id="ovClose" class="btn" type="button">Cerrar anuncio</button></div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+/* Catálogo de eventos: debe ser idéntico al de la página de equipos. */
+var EVENTS=[
+ {c:'HK-01',t:'perjudica',title:'Filtración de datos',desc:'Una startup parecida a la de ustedes sufrió un hackeo y se filtraron los datos de sus usuarios. Los usuarios de ustedes preguntan si sus datos están seguros.',ask:'¿Qué medida de seguridad anuncian hoy y qué dato dejan de guardar?',mat:'Seguridad Informática (SIS 4403)'},
+ {c:'LY-02',t:'perjudica',title:'Nueva ley de datos personales',desc:'Entra en vigor una ley que exige aviso de privacidad y consentimiento claro para guardar datos de las personas.',ask:'¿Qué datos dejan de pedir y cómo piden el consentimiento?',mat:'Legislación Informática (SIS 4407)'},
+ {c:'IA-03',t:'ayuda',title:'Sale una IA gratuita',desc:'Una nueva herramienta de IA gratuita automatiza tareas que antes eran manuales.',ask:'¿Qué parte de su producto automatizan con ella?',mat:'Inteligencia Artificial (SIS 4401)'},
+ {c:'CP-04',t:'perjudica',title:'Llega un competidor gigante',desc:'Una empresa enorme lanza un servicio casi igual al de ustedes, con mucha publicidad.',ask:'¿Qué los hace distintos y qué anuncian para destacar?',mat:'Emprendimiento e Innovación (EMP 1402)'},
+ {c:'IV-05',t:'ayuda',title:'Un inversionista te escribe',desc:'Una persona inversionista quiere conocer su producto, pero pide ver números antes de hablar.',ask:'¿Qué 3 métricas le muestran?',mat:'Inteligencia de Negocios (SIS 3409)'},
+ {c:'NB-06',t:'perjudica',title:'Se cae la nube',desc:'El proveedor de nube donde vive su app tuvo una caída de varias horas y nadie pudo entrar.',ask:'¿Qué cambian para que no vuelva a pasar?',mat:'Infraestructura y Nube (SIS 4404)'},
+ {c:'VI-07',t:'ayuda',title:'Te vuelves viral',desc:'Una persona influencer mostró su producto y llegaron diez veces más usuarios de golpe.',ask:'¿Qué parte del sistema se satura y cómo la preparan?',mat:'Redes de Computadoras (SIS 2401)'},
+ {c:'RA-08',t:'ayuda',title:'Boom de realidad aumentada',desc:'Los lentes de realidad aumentada bajan de precio y todo el mundo quiere usarlos.',ask:'¿Cómo aprovechan la realidad aumentada en su producto?',mat:'Realidad Virtual y Aumentada (SIS 4411)'},
+ {c:'AP-09',t:'ayuda',title:'Apoyo a startups con IA responsable',desc:'Se anuncia un apoyo económico para startups que usan IA de forma transparente y responsable.',ask:'¿Qué hacen para demostrar que usan la IA de forma responsable?',mat:'Legislación Informática (SIS 4407)'},
+ {c:'FK-10',t:'perjudica',title:'Cuentas falsas',desc:'Detectan miles de cuentas falsas que se están registrando en su plataforma.',ask:'¿Cómo verifican que sus usuarios son reales?',mat:'Seguridad Informática (SIS 4403)'},
+ {c:'DT-11',t:'ayuda',title:'Tus datos te sorprenden',desc:'Sus datos muestran que un grupo de personas que no esperaban usa su producto más que nadie.',ask:'¿Qué nueva función o mercado exploran?',mat:'Procesamiento Inteligente de Datos (SIS 4410)'},
+ {c:'UP-12',t:'perjudica',title:'Una actualización lo rompe',desc:'Subieron una actualización y el botón principal dejó de funcionar para todos.',ask:'¿Qué proceso de pruebas agregan antes de publicar?',mat:'Calidad de Software (SIS 4402)'}
+];
+
+/* Rol que resuelve el desafío de cada evento y su título (igual que en la página de equipos). */
+var EV_INFO={'HK-01':['seguridad','Bloquea al intruso'],'LY-02':['datos','Cumple la ley con una consulta'],'IA-03':['pitch','Elige qué automatizar'],'CP-04':['pitch','Responde al gigante'],'IV-05':['datos','Muestra los números al inversionista'],'NB-06':['seguridad','Encuentra el servidor caído'],'VI-07':['datos','Entiende de dónde llega tu tráfico'],'RA-08':['pitch','Primer paso con realidad aumentada'],'AP-09':['seguridad','IA responsable'],'FK-10':['seguridad','Bloquea las cuentas falsas'],'DT-11':['datos','Descubre a ese grupo inesperado'],'UP-12':['pitch','Publica sin romper nada']};
+var ROLE_NAME={seguridad:'Seguridad',datos:'Datos',pitch:'Pitch'};
+EVENTS.forEach(function(e){var i=EV_INFO[e.c];e.role=i[0];e.ch=i[1];});
+
+/* Fases en segundos desde el inicio del taller. */
+var PHASES=[
+ {n:'Bienvenida y gancho TIND',s:0,e:300},
+ {n:'Equipos y problema',s:300,e:600},
+ {n:'Ronda 1: landing con plantilla e IA',s:600,e:1500},
+ {n:'Ronda 2: datos',s:1500,e:1800},
+ {n:'Ronda 3: infraestructura y seguridad',s:1800,e:2100,mark:true},
+ {n:'Ronda 4: futuro, video y pitch',s:2100,e:3000,mark:true},
+ {n:'Demo Day',s:3000,e:3480},
+ {n:'Cierre',s:3480,e:3600}
+];
+var TOTAL=3600;
+var SLOTS=[1800,2400];
+var KEY='tps_admin_v1';
+
+function $(id){return document.getElementById(id);}
+var S={acc:0,startedAt:null,log:[],current:null,order:[],done:[],chLimit:3,evEnd:0,warn:{on:true,min:2},wf:{},auto:{on:false,start:30,every:10,max:2,fired:0}};
+try{var raw=localStorage.getItem(KEY);if(raw){S=Object.assign(S,JSON.parse(raw));}}catch(e){}
+if(!S.auto||typeof S.auto.start!=='number'){S.auto={on:false,start:30,every:10,max:2,fired:0};}
+if(!S.warn||typeof S.warn.min!=='number'){S.warn={on:true,min:2};}
+if(!S.wf)S.wf={};
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+
+function elapsedSec(){return (S.acc+(S.startedAt?Date.now()-S.startedAt:0))/1000;}
+function fmt(sec){sec=Math.max(0,Math.floor(sec));var m=Math.floor(sec/60),s=sec%60;return (m<10?'0':'')+m+':'+(s<10?'0':'')+s;}
+function phaseIndex(sec){for(var i=0;i<PHASES.length;i++){if(sec<PHASES[i].e)return i;}return PHASES.length-1;}
+function setElapsed(sec){S.acc=Math.max(0,sec)*1000;if(S.startedAt)S.startedAt=Date.now();save();}
+function evByCode(c){for(var i=0;i<EVENTS.length;i++){if(EVENTS[i].c===c)return EVENTS[i];}return null;}
+
+/* Construcción inicial */
+var bar=$('bar'),segs=[];
+PHASES.forEach(function(p){
+  var d=document.createElement('div');d.className='seg';d.style.flex=String(p.e-p.s);
+  var i=document.createElement('i');d.appendChild(i);bar.appendChild(d);segs.push(i);
+});
+var plist=$('phases'),pitems=[];
+PHASES.forEach(function(p){
+  var li=document.createElement('li');li.className='ph'+(p.mark?' mark':'');
+  li.innerHTML='<span class="when">'+fmt(p.s)+' a '+fmt(p.e)+'</span><span class="name">'+p.n+'</span><span class="tag" hidden>Ahora</span>';
+  plist.appendChild(li);pitems.push(li);
+});
+var pick=$('pick');
+EVENTS.forEach(function(ev){
+  var o=document.createElement('option');o.value=ev.c;o.textContent=ev.c+' '+ev.title+' ('+ev.t+')';pick.appendChild(o);
+});
+
+function tick(){
+  var el=elapsedSec(),rem=TOTAL-el;
+  var clock=$('clock');
+  clock.textContent=fmt(rem);
+  clock.classList.toggle('run',!!S.startedAt);
+  clock.classList.toggle('low',rem>0&&rem<=300);
+  var idx=phaseIndex(el),p=PHASES[idx],name,next='';
+  if(el<=0&&!S.startedAt){name='Listos para empezar';next='Primera fase: '+PHASES[0].n;}
+  else if(el>=TOTAL){name='El taller terminó';}
+  else{name=p.n;next=idx<PHASES.length-1?('Sigue: '+PHASES[idx+1].n+' en '+fmt(p.e-el)):('Termina en '+fmt(p.e-el));}
+  $('phaseName').textContent=name;$('phaseNext').textContent=next;
+  PHASES.forEach(function(ph,i){
+    var f=Math.max(0,Math.min(1,(el-ph.s)/(ph.e-ph.s)));
+    segs[i].style.width=(f*100)+'%';
+    var li=pitems[i],isNow=(el>0||S.startedAt)&&el<TOTAL&&i===idx;
+    li.classList.toggle('now',isNow);
+    li.classList.toggle('done',el>=ph.e);
+    li.querySelector('.tag').hidden=!isNow;
+  });
+  $('btnToggle').textContent=S.startedAt?'Pausar':(el>0?'Continuar':'Iniciar');
+  var due=SLOTS.filter(function(s){return el>=s;}).length,pending=S.auto.on?0:due-S.log.length,b=$('slotBadge');
+  if(pending>0){b.hidden=false;b.textContent=pending===1?'Toca lanzar un evento':'Tocan '+pending+' eventos';}else{b.hidden=true;}
+  autoStep(el);evTimerStep();warnStep(el);
+}
+
+/* Reloj */
+$('btnToggle').onclick=function(){
+  if(S.startedAt){S.acc+=Date.now()-S.startedAt;S.startedAt=null;}else{S.startedAt=Date.now();}
+  save();tick();
+};
+$('btnNext').onclick=function(){
+  var el=elapsedSec();if(el>=TOTAL)return;
+  setElapsed(PHASES[phaseIndex(el)].e);tick();
+};
+$('btnGain').onclick=function(){setElapsed(elapsedSec()-60);tick();};
+$('btnLose').onclick=function(){setElapsed(elapsedSec()+60);tick();};
+$('btnReset').onclick=function(){
+  if(!window.confirm('¿Reiniciar el reloj, el registro de eventos y el orden de pitch?'))return;
+  S={acc:0,startedAt:null,log:[],current:null,order:[],done:[],chLimit:S.chLimit,evEnd:0,warn:S.warn,wf:{},auto:{on:false,start:30,every:10,max:2,fired:0}};save();
+  syncAutoUi();renderEvents();renderOrder();tick();
+};
+
+/* Eventos */
+function curEntry(){for(var i=S.log.length-1;i>=0;i--){if(S.log[i].c===S.current)return S.log[i];}return null;}
+function teamCount(){return Math.max(1,Math.min(12,parseInt($('nTeams').value,10)||7));}
+function renderTeams(){
+  var e=curEntry(),T=teamCount(),ok=(e&&e.ok)?e.ok.filter(function(n){return n<=T;}):[],chips='',n;
+  for(n=1;n<=T;n++){var d=ok.indexOf(n)!==-1;chips+='<button class="chip'+(d?' done':'')+'" type="button" data-t="'+n+'">Equipo '+n+(d?' (listo)':'')+'</button>';}
+  var html='<p class="tt">Equipos que ya resolvieron: '+ok.length+' de '+T+(ok.length===T?'. ¡Todos!':'')+'</p><div class="tc">'+chips+'</div>';
+  ['ovTeams','curTeams'].forEach(function(id){var el=document.getElementById(id);if(el)el.innerHTML=html;});
+}
+document.addEventListener('click',function(ev){
+  var b=ev.target.closest('.tc button[data-t]');if(!b)return;
+  var e=curEntry();if(!e)return;
+  var n=parseInt(b.getAttribute('data-t'),10),T=teamCount();
+  if(!e.ok)e.ok=[];
+  var i=e.ok.indexOf(n);if(i===-1)e.ok.push(n);else e.ok.splice(i,1);
+  save();renderTeams();renderLog();
+  if(e.ok.filter(function(x){return x<=T;}).length===T&&i===-1){playAlert('ayuda');}
+});
+function evTimerStep(){
+  var left=0,ov=$('ovTimer'),cur=document.getElementById('curTimer'),active=!!(S.evEnd&&S.chLimit>0&&S.current);
+  if(active)left=Math.ceil((S.evEnd-Date.now())/1000);
+  var txt=active?(left>0?'Tiempo del desafío: '+fmt(left):'Se acabó el tiempo del desafío'):'';
+  if(ov){ov.hidden=!active||$('ovChallenge').hidden;ov.textContent=txt;ov.classList.toggle('low',active&&left<=30);}
+  if(cur){cur.textContent=txt;cur.classList.toggle('low',active&&left<=30);}
+}
+function renderLog(){
+  var lines=S.log.map(function(l){
+    var e=evByCode(l.c);if(!e)return '';
+    var T=teamCount(),k=(l.ok||[]).filter(function(n){return n<=T;}).length;
+    return '<div><span class="t">['+fmt(l.at)+']</span> <span class="c">'+e.c+'</span> '+e.title+' <span class="'+e.t+'">('+e.t+')</span> <span class="t">resolvieron '+k+'/'+T+'</span></div>';
+  }).join('');
+  $('log').innerHTML=lines||'<div class="t">sin eventos todavía</div>';
+}
+function renderEvents(){
+  var ev=S.current?evByCode(S.current):null,box=$('current');
+  if(ev){
+    box.innerHTML='<span class="tag '+ev.t+'">'+(ev.t==='ayuda'?'Ayuda':'Perjudica')+'</span>'+
+      '<h3>'+ev.title+'</h3><p>'+ev.desc+'</p>'+
+      '<p style="margin-top:8px">Código: <span class="code">'+ev.c+'</span></p>'+
+      '<p style="margin-top:8px"><b>Desafío:</b> '+ev.ch+'. Le toca a <b>'+ROLE_NAME[ev.role]+'</b>'+(ev.role==='pitch'?' (en equipos de 3, a Datos)':'')+'.</p>'+
+      '<p id="curTimer" class="curtimer"></p><div id="curTeams"></div>'+
+      '<details><summary>Materia para la frase de 5 segundos</summary><p>'+ev.mat+'</p></details>'+
+      '<div class="ctrls"><button id="btnShow" class="btn" type="button">Mostrar anuncio en pantalla</button></div>';
+    $('btnShow').onclick=function(){showOverlay(ev,true);};
+    renderTeams();evTimerStep();
+  }else{
+    box.innerHTML='<p class="muted">Todavía no hay un evento activo.</p>';
+  }
+  renderLog();
+}
+$('chLimit').value=String(S.chLimit);
+$('chLimit').addEventListener('change',function(){S.chLimit=parseInt($('chLimit').value,10)||0;save();});
+$('nTeams').addEventListener('change',function(){renderTeams();renderLog();});
+/* Alertas: sonido (Web Audio, sin archivos) y luces */
+var OPTKEY='tps_admin_opts_v2',OPT={sound:true,lights:true,repeat:true,vol:100},AC=null,MASTER_G=null,heard=false,repTimer=null,WL=null;
+try{var ro=localStorage.getItem(OPTKEY);if(ro){OPT=Object.assign(OPT,JSON.parse(ro));}}catch(e){}
+function saveOpt(){try{localStorage.setItem(OPTKEY,JSON.stringify(OPT));}catch(e){}}
+function ensureAudio(){
+  if(navigator.audioSession){try{navigator.audioSession.type='playback';}catch(e){}}
+  if(!AC){
+    var C=window.AudioContext||window.webkitAudioContext;if(!C)return null;
+    try{AC=new C();MASTER_G=AC.createGain();var cp=AC.createDynamicsCompressor();MASTER_G.connect(cp);cp.connect(AC.destination);}catch(e){AC=null;return null;}
+  }
+  MASTER_G.gain.value=Math.max(0.05,Math.min(1,OPT.vol/100));
+  if(AC.state==='suspended'&&AC.resume){try{AC.resume();}catch(e){}}
+  return AC;
+}
+function tone(freq,t0,dur,type,vol,freqEnd){
+  var o=AC.createOscillator(),g=AC.createGain();
+  o.type=type||'sine';o.frequency.setValueAtTime(freq,t0);
+  if(freqEnd)o.frequency.linearRampToValueAtTime(freqEnd,t0+dur);
+  g.gain.setValueAtTime(0.0001,t0);g.gain.exponentialRampToValueAtTime(vol||0.2,t0+0.04);g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+  o.connect(g);g.connect(MASTER_G);o.start(t0);o.stop(t0+dur+0.05);
+}
+function playAlert(kind){
+  if(!OPT.sound)return;
+  var ac=ensureAudio();if(!ac)return;
+  var t0=ac.currentTime+0.05,i;
+  if(kind==='perjudica'){for(i=0;i<4;i++){tone(650,t0+i*0.55,0.5,'sawtooth',0.4,950);}}
+  else{[660,880,1100,1320].forEach(function(fr,k){tone(fr,t0+k*0.16,0.45,'triangle',0.4);});}
+}
+function updateSoundState(){
+  var el=$('soundState'),msg,warn=false;
+  if(!OPT.sound){msg='Sonido apagado.';}
+  else if(!AC||AC.state!=='running'){msg='Haz clic en "Probar alerta" para activar el sonido. Sin ese clic el navegador lo bloquea.';warn=true;}
+  else if(!heard){msg='Sonido activo, pero sin confirmar. Usa "Probar alerta" y confirma que se escucha.';warn=true;}
+  else{msg='Sonido confirmado.';}
+  if(document.hidden){msg+=' La pestaña está en segundo plano: el navegador puede frenar el sonido y el reloj.';warn=true;}
+  el.textContent=msg;el.className='soundstate'+(warn?' warn':'');
+}
+function keepAwake(){
+  if(!navigator.wakeLock||WL)return;
+  navigator.wakeLock.request('screen').then(function(l){WL=l;l.addEventListener('release',function(){WL=null;});}).catch(function(){});
+}
+document.addEventListener('visibilitychange',function(){if(!document.hidden){keepAwake();ensureAudio();}updateSoundState();});
+$('optSound').checked=!!OPT.sound;$('optLights').checked=!!OPT.lights;$('optRepeat').checked=!!OPT.repeat;$('optVol').value=String(OPT.vol);
+$('optSound').addEventListener('change',function(){OPT.sound=$('optSound').checked;saveOpt();if(OPT.sound){ensureAudio();playAlert('ayuda');}updateSoundState();});
+$('optLights').addEventListener('change',function(){OPT.lights=$('optLights').checked;saveOpt();});
+$('optRepeat').addEventListener('change',function(){OPT.repeat=$('optRepeat').checked;saveOpt();});
+$('optVol').addEventListener('input',function(){OPT.vol=parseInt($('optVol').value,10)||60;saveOpt();if(MASTER_G)MASTER_G.gain.value=OPT.vol/100;});
+var TEST_EV={t:'perjudica',title:'Prueba de alerta',desc:'Así se verá y se escuchará un evento en el salón. Los eventos que ayudan suenan con una campanita y luces verdes.',ask:'¿Se ve y se escucha bien desde el fondo del salón?',c:'PRUEBA'};
+$('btnTest').onclick=function(){
+  ensureAudio();keepAwake();
+  showOverlay(TEST_EV,false,true);
+  setTimeout(updateSoundState,300);
+};
+$('ovHeard').onclick=function(){heard=true;$('ovTest').hidden=true;$('ovHelp').hidden=true;updateSoundState();};
+$('ovNoHeard').onclick=function(){heard=false;$('ovHelp').hidden=false;updateSoundState();};
+$('ovRetry').onclick=function(){ensureAudio();playAlert('perjudica');};
+document.addEventListener('click',function(){keepAwake();if(AC&&AC.state==='suspended')ensureAudio();setTimeout(updateSoundState,200);},true);
+
+function showOverlay(ev,quiet,isTest){
+  var ov=$('overlay');ov.className='overlay'+(OPT.lights?' lights':'')+(ev.t==='ayuda'?' good':' bad');
+  $('ovTest').hidden=!isTest;$('ovHelp').hidden=true;
+  if(repTimer){clearInterval(repTimer);repTimer=null;}
+  if(!quiet){
+    playAlert(ev.t);
+    if(!isTest&&OPT.repeat&&OPT.sound){
+      var n=0;repTimer=setInterval(function(){n++;if($('overlay').hidden||n>2){clearInterval(repTimer);repTimer=null;return;}playAlert(ev.t);},6000);
+    }
+  }
+  var tag=$('ovTag');tag.textContent=ev.t==='ayuda'?'Ayuda':'Perjudica';tag.className='tag ovtag '+ev.t;
+  $('ovTitle').textContent=ev.title;$('ovDesc').textContent=ev.desc;
+  $('ovAsk').textContent=ev.ask;$('ovCode').textContent=ev.c;
+  var hasCh=!!ev.role&&!isTest;
+  $('ovChallenge').hidden=!hasCh;$('ovTeams').hidden=!hasCh;
+  if(hasCh){
+    $('ovRole').textContent='Le toca a '+ROLE_NAME[ev.role];
+    $('ovChTitle').textContent='Desafío: '+ev.ch;
+    $('ovChNote').textContent=(ev.role==='pitch'?'En equipos de 3, lo resuelve Datos. ':'')+'Dicta la clave a Producto.';
+    renderTeams();
+  }
+  evTimerStep();
+  $('overlay').hidden=false;$('ovClose').focus();
+}
+function closeOverlay(){$('overlay').hidden=true;if(repTimer){clearInterval(repTimer);repTimer=null;}}
+function launch(code){
+  var ev=evByCode(code);if(!ev)return;
+  S.current=code;S.log.push({c:code,at:Math.floor(elapsedSec()),ok:[]});S.evEnd=S.chLimit>0?Date.now()+S.chLimit*60000:0;save();
+  renderEvents();showOverlay(ev);tick();
+}
+$('btnRandom').onclick=function(){launch(pickRandom());};
+$('btnPick').onclick=function(){launch($('pick').value);};
+$('ovClose').onclick=closeOverlay;
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!$('overlay').hidden)closeOverlay();});
+
+/* Aviso previo antes de que termine cada fase */
+var PHASE_SHORT=['la bienvenida','la formación de equipos','la ronda 1 (la landing)','la ronda 2 (los datos)','la ronda 3 (infraestructura y seguridad)','la ronda 4 (futuro, video y pitch)','el Demo Day','el cierre'];
+var wbTimer=null;
+function showWarn(i,secs){
+  var min=Math.round(secs/60),title,sub;
+  if(secs>=60){
+    title=(min===1)?'Queda 1 minuto':'Quedan '+min+' minutos';
+    sub='para terminar '+PHASE_SHORT[i]+'. Vayan cerrando lo pendiente.';
+  }else{
+    title='Quedan '+secs+' segundos';
+    sub='para terminar '+PHASE_SHORT[i]+'. Guarden lo que tengan.';
+  }
+  var bar=$('warnBar');
+  $('wbTitle').textContent=title;$('wbSub').textContent=sub;
+  bar.className='warnbar'+(OPT.lights?' lights':'')+(secs<60?' last':'');
+  bar.hidden=false;
+  playWarn(secs<60);
+  clearTimeout(wbTimer);wbTimer=setTimeout(function(){bar.hidden=true;},16000);
+}
+function playWarn(last){
+  if(!OPT.sound)return;
+  var ac=ensureAudio();if(!ac)return;
+  var t0=ac.currentTime+0.05,n=last?5:3,f=last?1100:880,gap=last?0.2:0.32,i;
+  for(i=0;i<n;i++){tone(f,t0+i*gap,0.14,'square',0.28);}
+}
+function warnStep(el){
+  if(!S.warn.on||!S.startedAt)return;
+  var idx=phaseIndex(el),p=PHASES[idx];
+  if(idx>=PHASES.length-1)return;
+  var rem=p.e-el,len=p.e-p.s,thrs=[S.warn.min*60,30],k,thr,key;
+  for(k=0;k<thrs.length;k++){
+    thr=thrs[k];key=idx+':'+thr;
+    if(rem>thr+10&&S.wf[key]){delete S.wf[key];}
+    if(k===0&&len<(S.warn.min+1)*60)continue;
+    if(k===1&&len<120)continue;
+    if(!S.wf[key]&&rem<=thr&&rem>thr-4){S.wf[key]=true;save();showWarn(idx,thr);return;}
+  }
+}
+$('warnOn').checked=!!S.warn.on;
+$('warnMin').value=String(S.warn.min);
+$('warnOn').addEventListener('change',function(){S.warn.on=$('warnOn').checked;save();});
+$('warnMin').addEventListener('change',function(){S.warn.min=parseInt($('warnMin').value,10)||2;S.wf={};save();});
+$('btnWarnTest').onclick=function(){
+  ensureAudio();
+  showWarn(Math.min(phaseIndex(elapsedSec()),PHASES.length-2),Math.max(60,S.warn.min*60));
+  setTimeout(updateSoundState,300);
+};
+$('wbClose').onclick=function(){$('warnBar').hidden=true;};
+
+/* Lanzamiento automático de eventos */
+var DEMO_START=3000;
+function autoTimes(){
+  var a=S.auto,out=[],i,tm;
+  for(i=0;i<a.max;i++){tm=a.start*60+i*a.every*60;if(tm<DEMO_START)out.push(tm);}
+  return out;
+}
+function pickRandom(){
+  var f=$('filter').value;
+  var pool=EVENTS.filter(function(e){return f==='todos'||e.t===f;});
+  if(f==='todos'&&S.log.length){
+    var last=evByCode(S.log[S.log.length-1].c),alt=last?pool.filter(function(e){return e.t!==last.t;}):[];
+    if(alt.length)pool=alt;
+  }
+  var used=S.log.map(function(l){return l.c;});
+  var fresh=pool.filter(function(e){return used.indexOf(e.c)===-1;});
+  if(!fresh.length)fresh=pool;
+  return fresh[Math.floor(Math.random()*fresh.length)].c;
+}
+function minList(times){
+  var m=times.map(function(x){return x/60;});
+  if(m.length===1)return 'el minuto '+m[0];
+  return 'los minutos '+m.slice(0,-1).join(', ')+' y '+m[m.length-1];
+}
+function autoStep(el){
+  var a=S.auto,info=$('autoInfo'),times=autoTimes();
+  if(!a.on){info.textContent='Apagado. Los eventos se lanzan solo con los botones de abajo.';return;}
+  if(!S.startedAt&&el<=0){info.textContent='Listo. Los eventos saldrán en '+minList(times)+' del taller, cuando inicies el reloj.';return;}
+  if(a.fired>=times.length){info.textContent='Ya se lanzaron todos los eventos programados ('+times.length+').';return;}
+  var next=times[a.fired];
+  if(S.startedAt&&el>=next){
+    a.fired=times.filter(function(x){return x<=el;}).length;
+    save();launch(pickRandom());
+    return;
+  }
+  info.textContent=(S.startedAt?'Próximo evento en '+fmt(next-el)+' (minuto '+next/60+').':'Reloj en pausa. El próximo evento sale en el minuto '+next/60+'.')+' Programados: '+minList(times)+'.';
+}
+function syncAutoUi(){
+  $('autoOn').checked=!!S.auto.on;$('autoStart').value=String(S.auto.start);$('autoEvery').value=String(S.auto.every);$('autoMax').value=String(S.auto.max);
+}
+function autoChanged(){
+  S.auto.on=$('autoOn').checked;
+  S.auto.start=parseInt($('autoStart').value,10);S.auto.every=parseInt($('autoEvery').value,10);S.auto.max=parseInt($('autoMax').value,10);
+  var el=elapsedSec();S.auto.fired=autoTimes().filter(function(x){return x<=el;}).length;
+  save();tick();
+}
+['autoOn','autoStart','autoEvery','autoMax'].forEach(function(id){$(id).addEventListener('change',autoChanged);});
+
+/* Demo Day */
+function renderOrder(){
+  var ol=$('order');
+  if(!S.order.length){ol.innerHTML='<li class="muted">Aún no se sortea el orden.</li>';return;}
+  ol.innerHTML=S.order.map(function(t,i){
+    var d=S.done.indexOf(t)!==-1;
+    return '<li><button class="chip'+(d?' done':'')+'" type="button" data-t="'+t+'">'+(i+1)+'. Equipo '+t+(d?' (listo)':'')+'</button></li>';
+  }).join('');
+}
+$('order').addEventListener('click',function(e){
+  var b=e.target.closest('button[data-t]');if(!b)return;
+  var t=parseInt(b.getAttribute('data-t'),10),i=S.done.indexOf(t);
+  if(i===-1)S.done.push(t);else S.done.splice(i,1);
+  save();renderOrder();
+});
+$('btnShuffle').onclick=function(){
+  var n=Math.max(2,Math.min(12,parseInt($('nTeams').value,10)||5)),a=[],i,j,tmp;
+  for(i=1;i<=n;i++)a.push(i);
+  for(i=n-1;i>0;i--){j=Math.floor(Math.random()*(i+1));tmp=a[i];a[i]=a[j];a[j]=tmp;}
+  S.order=a;S.done=[];save();renderOrder();
+};
+var pitchLeft=60,pitchT=null;
+function renderPitch(){
+  var c=$('pitchClock');c.textContent=fmt(pitchLeft);c.classList.toggle('low',pitchLeft<=10);
+  $('pitchMsg').textContent=pitchLeft===0?'Se acabó el tiempo':(pitchLeft<=10?'Últimos 10 segundos':'');
+}
+$('btnPitch').onclick=function(){
+  if(pitchT){clearInterval(pitchT);pitchT=null;$('btnPitch').textContent='Continuar pitch';return;}
+  if(pitchLeft<=0)pitchLeft=60;
+  $('btnPitch').textContent='Pausar pitch';
+  pitchT=setInterval(function(){
+    pitchLeft--;
+    if(pitchLeft<=0){pitchLeft=0;clearInterval(pitchT);pitchT=null;$('btnPitch').textContent='Iniciar pitch';}
+    renderPitch();
+  },1000);
+};
+$('btnPitchReset').onclick=function(){
+  if(pitchT){clearInterval(pitchT);pitchT=null;}
+  pitchLeft=60;$('btnPitch').textContent='Iniciar pitch';renderPitch();
+};
+
+$('btnFull').onclick=function(){
+  if(document.fullscreenElement){document.exitFullscreen();}
+  else if(document.documentElement.requestFullscreen){document.documentElement.requestFullscreen();}
+};
+
+
+/* Claves por equipo: misma fórmula que la página de equipos. */
+var WORDS=['NOVA','PIXEL','BYTE','LOGIN','RUTA','NUBE','DATO','CHIP','REDES','LINUX','CODIGO','CLAVE'];
+var MASTER='MAESTRO-TIND';
+function keyFor(num,round){var w=WORDS[(num*5+round*3)%WORDS.length],n=((num*7+round*11)%90)+10;return w+'-'+n;}
+(function(){
+  $('masterCode').textContent=MASTER;
+  var LAYOUT_NAMES=['clásica','app móvil','tablero','tienda','comunidad','terminal'];
+  var CHAOS_NAMES=['puerto 80 ocupado','deploy en viernes','contraseña en el repo','SSL vencido','DNS sin propagar','en mi máquina sí funciona','base de datos mal nombrada','disco lleno','rama equivocada'];
+  var rows=['<div class="t">eq  ronda 2     ronda 3     ronda 4     formato      error de deploy</div>'];
+  for(var i=1;i<=12;i++){
+    rows.push('<div><span class="c">'+(i<10?' ':'')+i+'</span>  '+keyFor(i,2)+'  '+keyFor(i,3)+'  '+keyFor(i,4)+'  '+LAYOUT_NAMES[(i-1)%6]+'  |  '+CHAOS_NAMES[(i-1)%9]+'</div>');
+  }
+  $('keysTable').innerHTML=rows.join('');
+  var sel=$('keyTeam'),j;
+  for(j=1;j<=12;j++){var o=document.createElement('option');o.value=String(j);o.textContent='Equipo '+j;sel.appendChild(o);}
+  function evKeyAdmin(num,i){return WORDS[(num*3+i*5)%WORDS.length]+'-'+(((num*11+i*7)%80)+20);}
+  function drawEvKeys(){
+    var num=parseInt(sel.value,10)||1,out=['<div class="t">evento  rol         clave</div>'];
+    EVENTS.forEach(function(e,i){out.push('<div><span class="c">'+e.c+'</span>  '+(ROLE_NAME[e.role]+'            ').slice(0,10)+'  '+evKeyAdmin(num,i)+'</div>');});
+    $('evKeysTable').innerHTML=out.join('');
+  }
+  sel.addEventListener('change',drawEvKeys);drawEvKeys();
+  var MIS=[['D1','Datos','¿Quién usa la app desde el celular?'],['D2','Datos','Pedidos que se cancelan'],['D3','Datos','¿Qué les interesa a tus usuarios?'],['D4','Datos','Los picos de los viernes'],['D5','Datos','El camino de un dato'],['S1','Seguridad','Detecta el cobro sospechoso'],['S2','Seguridad','El mensaje cifrado'],['S3','Seguridad','Correo sospechoso'],['S4','Seguridad','Solo los datos necesarios'],['S5','Seguridad','Respuesta a un incidente'],['P1','Pitch','La primera frase'],['P2','Pitch','La estructura del pitch'],['P3','Pitch','Solo tienes 60 segundos'],['P4','Pitch','Que lo recuerden'],['P5','Pitch','Detecta la frase vacía'],['S6','Seguridad','Filtra el tráfico web'],['S7','Seguridad','El PIN de 4 dígitos'],['S8','Seguridad','Contraseña a prueba de robots'],['S9','Seguridad','Caza las señales falsas']];
+  var sel2=$('misTeam'),q;
+  for(q=1;q<=12;q++){var o2=document.createElement('option');o2.value=String(q);o2.textContent='Equipo '+q;sel2.appendChild(o2);}
+  function mKeyAdmin(num,i){return WORDS[(num*7+i*3)%WORDS.length]+'-'+(((num*13+i*9)%80)+20);}
+  function drawMisKeys(){
+    var num=parseInt(sel2.value,10)||1,out=['<div class="t">id  rol        código       misión</div>'];
+    MIS.forEach(function(m,i){out.push('<div><span class="c">'+m[0]+'</span>  '+(m[1]+'          ').slice(0,9)+'  '+(mKeyAdmin(num,i)+'            ').slice(0,11)+'  '+m[2]+'</div>');});
+    $('misKeysTable').innerHTML=out.join('');
+  }
+  sel2.addEventListener('change',drawMisKeys);drawMisKeys();
+})();
+
+syncAutoUi();updateSoundState();renderEvents();renderOrder();renderPitch();tick();
+setInterval(tick,250);
+})();
+</script>
+</body>
+</html>

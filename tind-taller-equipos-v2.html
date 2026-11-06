@@ -1,0 +1,2075 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tu Primera Startup: página de equipos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#14161C; --card:#1D2029; --card2:#262B37; --line:#2E3340; --text:#F4F1EA; --body:#C3C8D4; --muted:#8A90A0;
+  --orange:#FF7A1A; --teal:#4FD1C5; --warn:#FF8A8A;
+  --mono:'JetBrains Mono','Courier New',monospace; --sans:'DM Sans',Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:17px;line-height:1.45}
+h1,h2,h3,p{margin:0}
+button,input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--teal);outline-offset:2px}
+[hidden]{display:none !important}
+
+.app{display:grid;grid-template-columns:250px minmax(340px,1fr) minmax(380px,1.15fr);height:100vh}
+.app.comp{grid-template-columns:250px minmax(340px,1fr)}
+.app.comp .preview{display:none}
+
+/* Inicio */
+.start{position:fixed;inset:0;z-index:100;background:var(--bg);overflow:auto;display:grid;place-items:center;padding:24px}
+.startbox{width:100%;max-width:640px}
+.startbox .logo{padding:0;margin-bottom:6px}
+
+/* Barra lateral */
+.side{background:#10121A;border-right:1px solid var(--line);padding:20px 14px;display:flex;flex-direction:column;gap:14px;overflow:auto}
+.logo{font-family:var(--mono);font-weight:800;font-size:20px;line-height:1.2;padding:0 8px}
+.logo span{color:var(--orange)}
+.who{margin:0 8px;padding:10px 12px;background:var(--card);border:1px solid var(--line);border-radius:10px;font-size:15px;color:var(--body)}
+.who button{display:block;margin-top:8px;background:none;border:0;padding:0;color:var(--teal);cursor:pointer;text-decoration:underline;font-size:14px}
+.nav{display:flex;flex-direction:column;gap:4px}
+.navbtn{display:grid;grid-template-columns:1fr auto;gap:2px 8px;text-align:left;background:transparent;border:1px solid transparent;border-radius:10px;padding:10px 12px;cursor:pointer}
+.navbtn:hover{background:var(--card)}
+.navbtn[aria-current="true"]{background:var(--card2);border-color:var(--line);box-shadow:inset 4px 0 0 var(--orange)}
+.navbtn .file{font-family:var(--mono);font-size:14px;color:var(--teal);grid-column:1}
+.navbtn .lbl{font-weight:700;grid-column:1}
+.navbtn .tick{grid-row:1 / span 2;grid-column:2;align-self:center;color:var(--teal);font-weight:800;font-size:14px}
+.navbtn .tick.lock{color:var(--warn)}
+.prog{padding:0 8px}
+.prog p{font-size:15px;color:var(--body);margin-bottom:6px}
+.meter{height:10px;background:var(--line);border-radius:5px;overflow:hidden}
+.meter i{display:block;height:100%;width:0;background:var(--orange);transition:width .25s}
+.v1ok{margin:0 8px;font-family:var(--mono);font-size:14px;color:var(--teal)}
+.reset{margin-top:auto;background:none;border:1px solid var(--line);color:var(--muted);border-radius:10px;padding:8px 12px;cursor:pointer;font-size:14px}
+
+/* Editor */
+.editor{overflow:auto;padding:28px 30px 60px}
+.panel{max-width:660px}
+.panel h2{font-family:var(--mono);font-size:26px;font-weight:800;line-height:1.15;margin-bottom:8px}
+.lead{color:var(--body);margin-bottom:20px}
+.field{display:block;margin-bottom:16px}
+.field>span{display:block;font-weight:700;margin-bottom:6px}
+.field small{display:block;color:var(--muted);margin-top:4px}
+input[type=text],textarea,select{width:100%;background:#10121A;border:1px solid var(--line);border-radius:10px;padding:11px 13px}
+input[type=text]:focus,textarea:focus{border-color:var(--teal)}
+textarea{resize:vertical;min-height:84px}
+textarea.code{font-family:var(--mono);font-size:15px;line-height:1.5}
+.hint{background:#181B22;border:1px dashed var(--line);border-radius:10px;padding:12px 14px;color:var(--body);margin:6px 0 16px}
+.hint code,.lead code{font-family:var(--mono);color:var(--teal)}
+.group{display:grid;gap:8px;margin-bottom:16px}
+.opt{display:flex;gap:10px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer}
+.opt:hover{border-color:var(--muted)}
+.opt input{margin-top:4px;accent-color:var(--orange);width:18px;height:18px;flex:none}
+.opt:has(input:checked){border-color:var(--orange);background:#241E1A}
+.opt small{display:block;color:var(--muted)}
+.chipgroup{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.chipgroup .opt{padding:8px 14px}
+.emojis .opt{padding:6px 10px;font-size:24px}
+.emojis .opt input{position:absolute;opacity:0;pointer-events:none}
+.emojis .opt:has(input:focus-visible){outline:3px solid var(--teal)}
+.bar2{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+.btn{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:11px 18px;cursor:pointer;font-weight:500}
+.btn:hover{border-color:var(--muted)}
+.btn:disabled{opacity:.4;cursor:default}
+.btn.primary{background:var(--orange);border-color:var(--orange);color:#14161C;font-weight:700}
+.msg{min-height:26px;margin:10px 0;color:var(--warn);font-weight:500}
+.msg.ok{color:var(--teal)}
+.codeinput{display:flex;gap:10px;flex-wrap:wrap}
+.codeinput input{flex:1;min-width:160px;font-family:var(--mono);font-size:22px;letter-spacing:.08em;text-transform:uppercase}
+.lockbox{background:#1E1A1A;border:1px solid var(--warn);border-radius:12px;padding:18px;margin-bottom:18px}
+.lockbox h3{font-family:var(--mono);font-size:18px;margin-bottom:6px;color:var(--warn)}
+.lockbox p{margin-bottom:12px;color:var(--body)}
+.evcard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px;border-left-width:6px}
+.evcard.ayuda{border-left-color:var(--teal)}
+.evcard.perjudica{border-left-color:var(--warn)}
+.evh{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:6px}
+.tag{font-family:var(--mono);font-weight:700;font-size:13px;border-radius:6px;padding:2px 9px;color:#14161C}
+.ayuda .tag{background:var(--teal)}
+.perjudica .tag{background:var(--warn)}
+.ver{margin-left:auto;font-family:var(--mono);color:var(--muted);font-size:14px}
+.twist{margin:8px 0;padding:10px 12px;background:#181B22;border-radius:8px;color:var(--text)}
+.rp{margin:8px 0 0;padding-left:18px;color:var(--body);font-size:15px}
+.evcard label{display:block;font-weight:700;margin-top:10px}
+.evcard textarea{margin-top:6px;font-weight:400}
+.out{margin-bottom:22px}
+.out h3{font-family:var(--mono);font-size:18px;margin-bottom:4px}
+.out p{color:var(--muted);font-size:15px;margin-bottom:8px}
+.out textarea{min-height:150px;font-family:var(--mono);font-size:14px;line-height:1.5}
+.count{font-size:14px;color:var(--muted);margin-top:4px}
+.steps{padding-left:20px;color:var(--body)}
+
+/* Retos */
+.term{background:#0F1116;border:1px solid var(--line);border-radius:10px;padding:14px 16px;font-family:var(--mono);font-size:15px;line-height:1.55;white-space:pre-wrap;min-height:64px;color:var(--body);margin:0 0 14px;overflow:auto}
+.term .err{color:var(--warn)}
+.term .ok{color:var(--teal)}
+.term .dim{color:var(--muted)}
+.term.big{font-size:22px;letter-spacing:.04em}
+.keybox{font-family:var(--mono);font-weight:800;font-size:34px;color:var(--orange);margin:6px 0}
+.wheel{display:flex;align-items:center;gap:14px;margin:0 0 14px}
+.wheel output{font-family:var(--mono);font-size:30px;font-weight:800;min-width:48px;text-align:center}
+.alpha{font-family:var(--mono);font-size:15px;letter-spacing:.2em;line-height:1.6;color:var(--body);overflow:auto;white-space:pre}
+.alpha b{color:var(--orange)}
+.pz{list-style:none;margin:0 0 14px;padding:0;display:grid;gap:6px}
+.pz li{display:flex;align-items:center;gap:10px;background:#0F1116;border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-family:var(--mono);font-size:15px}
+.pz li span{flex:1;white-space:pre}
+.pz button{background:var(--card2);border:1px solid var(--line);border-radius:6px;width:34px;height:30px;cursor:pointer}
+.pz button:disabled{opacity:.35;cursor:default}
+.rclock{font-family:var(--mono);font-weight:800;font-size:56px;line-height:1;margin:6px 0 10px}
+.rclock.low{color:var(--warn)}
+
+/* Vista previa */
+.preview{border-left:1px solid var(--line);display:flex;flex-direction:column;min-width:0;background:#0D0F14}
+.chrome{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:#10121A}
+.dots{display:flex;gap:6px}
+.dots i{width:12px;height:12px;border-radius:50%;background:var(--muted);display:block}
+.dots i:first-child{background:var(--orange)}
+.dots i:nth-child(2){background:var(--teal)}
+.url{flex:1;min-width:0;background:#0D0F14;border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-family:var(--mono);font-size:14px;color:var(--body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ver2{font-family:var(--mono);font-size:14px;color:var(--teal);white-space:nowrap}
+#previewSec{scroll-margin-top:0}
+.pframe{flex:1;position:relative;overflow:hidden;background:#0D0F14;min-height:240px}
+#frame{position:absolute;left:0;top:0;border:0;background:#fff;transform-origin:0 0}
+.prevbar a{color:var(--teal);font-size:14px}
+.side .logo{font-size:17px;white-space:nowrap}
+.jump{display:none;position:fixed;right:14px;bottom:14px;z-index:20;background:var(--orange);color:#14161C;border-radius:999px;padding:12px 18px;font-weight:700;text-decoration:none;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+.prevbar{padding:10px 16px;border-top:1px solid var(--line);display:flex;gap:10px;flex-wrap:wrap;align-items:center;background:#10121A}
+.prevbar span{color:var(--muted);font-size:14px;flex:1;min-width:160px}
+
+.fixbox{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}
+.term .warn{color:#F5C26B}
+.dpstatus{min-height:26px;font-weight:700;color:var(--teal);margin:8px 0}
+.layouts .opt b{display:block}
+/* Evento rápido */
+.evfab{position:fixed;left:14px;bottom:14px;z-index:30;display:inline-flex;gap:8px;align-items:center;background:var(--teal);color:#14161C;border:0;border-radius:999px;padding:13px 20px;font-weight:800;font-size:17px;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+.evfab span{background:var(--orange);color:#14161C;border-radius:999px;padding:2px 10px;font-size:13px}
+.evdlg{position:fixed;inset:0;z-index:60;background:rgba(10,12,16,.82);display:grid;place-items:center;padding:16px;overflow:auto}
+.evbox{position:relative;width:100%;max-width:560px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px 22px}
+.evbox h2{font-family:var(--mono);font-size:22px;line-height:1.2;margin:0 40px 8px 0}
+.evx{position:absolute;right:12px;top:12px;width:38px;height:38px;border-radius:10px;background:var(--card2);border:1px solid var(--line);cursor:pointer;font-size:18px}
+#evQuick{font-family:var(--mono);font-size:34px;letter-spacing:.12em;text-transform:uppercase;text-align:center;padding:14px}
+.toast{position:fixed;left:50%;bottom:78px;transform:translateX(-50%);z-index:70;background:var(--teal);color:#14161C;font-weight:700;border-radius:12px;padding:12px 20px;max-width:90vw;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+.evbox{max-width:680px}
+.linkbtn{background:none;border:0;padding:0;color:var(--teal);text-decoration:underline;cursor:pointer;font-size:14px}
+.dt{border-collapse:collapse;font-family:var(--mono);font-size:14px;margin:0 0 14px;width:100%}
+.dt th{background:var(--card2);border:1px solid var(--line);padding:6px 10px;text-align:left;color:var(--teal)}
+.dt td{border:1px solid var(--line);padding:6px 10px}
+.tblwrap{overflow:auto}
+.sqlb{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:12px;display:grid;gap:12px}
+.sqlb p{margin:0;color:var(--body)}
+.sqlb code{font-family:var(--mono);color:var(--teal)}
+.chips2{display:flex;flex-wrap:wrap;gap:8px}
+.chips2 label{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--line);border-radius:999px;padding:6px 12px;cursor:pointer;font-family:var(--mono);font-size:14px}
+.chips2 label:has(input:checked){border-color:var(--orange);background:#241E1A}
+.chips2 input{accent-color:var(--orange)}
+.wherow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.wherow select{width:auto;min-width:150px}
+.loglines{display:grid;gap:6px;margin-bottom:12px}
+.logline{text-align:left;font-family:var(--mono);font-size:13px;line-height:1.4;background:#0F1116;border:1px solid var(--line);border-radius:8px;padding:8px 10px;cursor:pointer;white-space:pre-wrap}
+.logline:hover{border-color:var(--teal)}
+.logline.no{border-color:var(--warn);opacity:.6}
+.mc{display:grid;gap:8px;margin-bottom:12px}
+.mcopt{text-align:left;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;font-size:16px}
+.mcopt:hover{border-color:var(--teal)}
+.mcopt.no{border-color:var(--warn);opacity:.65}
+.chtitle{font-family:var(--mono);font-weight:800;font-size:18px;margin:6px 0}
+.lockev{background:#1E1A1A;border:1px solid var(--warn);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.lockev p{margin:0 0 10px;color:var(--body)}
+/* Misiones */
+.mis{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:10px;overflow:hidden}
+.mis.done{border-color:var(--teal)}
+.mh{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;text-align:left;background:none;border:0;padding:14px 16px;cursor:pointer}
+.mh small{display:block;color:var(--muted);font-weight:400}
+.mh .ms{font-family:var(--mono);font-size:13px;color:var(--muted);white-space:nowrap}
+.mis.done .ms{color:var(--teal)}
+.mb{padding:0 16px 16px}
+/* Retos de seguridad dinámicos */
+.pklist{display:grid;gap:8px;margin-bottom:12px;min-height:210px;align-content:start}
+.pk{text-align:left;font-family:var(--mono);font-size:14px;line-height:1.4;background:#0F1116;border:1px solid var(--line);border-radius:8px;padding:10px 12px;cursor:pointer;color:var(--text)}
+.pk:hover{border-color:var(--orange)}
+.pk.ok{border-color:var(--teal);color:var(--teal);cursor:default}
+.pk.no{border-color:var(--warn);color:var(--warn);cursor:default}
+.mail{display:grid;gap:8px;margin-bottom:12px;background:#0F1116;border:1px solid var(--line);border-radius:12px;padding:14px}
+.phel{text-align:left;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 12px;cursor:pointer;font-size:16px;line-height:1.35;color:var(--text)}
+.phel:hover{border-color:var(--orange)}
+.phel .pl{font-family:var(--mono);font-size:13px;color:var(--teal);margin-right:6px}
+.phel.ok{border-color:var(--teal);background:#16211F}
+.phel.no{border-color:var(--warn);opacity:.65}
+.rules2{list-style:none;margin:0 0 10px;padding:0;display:grid;gap:4px;font-size:15px}
+.rules2 li.ok{color:var(--teal)}
+.rules2 li.no{color:var(--body)}
+@media (max-width:480px){.alpha{font-size:13px;letter-spacing:.08em}}
+@media (max-width:1100px){
+  .jump{display:block}
+  html,body{height:auto}
+  .app,.app.comp{grid-template-columns:1fr;height:auto}
+  .side{border-right:0;border-bottom:1px solid var(--line)}
+  .nav{flex-direction:row;overflow-x:auto;padding-bottom:4px}
+  .navbtn{min-width:140px}
+  .reset{margin-top:0;align-self:flex-start}
+  .editor{overflow:visible;padding:22px 18px 96px}
+  .preview{border-left:0;border-top:1px solid var(--line);height:88vh}
+}
+@media (prefers-reduced-motion:reduce){.meter i{transition:none}}
+</style>
+</head>
+<body>
+
+<div id="start" class="start" role="dialog" aria-modal="true" aria-labelledby="stTitle" hidden>
+  <div class="startbox">
+    <h1 id="stTitle" class="logo">tu_primera<span>_startup</span>/</h1>
+    <p class="lead">Antes de empezar, dinos quién eres en tu equipo. Cada persona entra desde su propio dispositivo.</p>
+    <label class="field"><span>Número de equipo</span><select id="stNum"></select></label>
+    <div class="field"><span>¿Cuántas personas son en el equipo?</span><div class="chipgroup" id="stSize" role="radiogroup" aria-label="Tamaño del equipo"></div></div>
+    <div class="field"><span>Tu rol</span><div class="group" id="stRole" role="radiogroup" aria-label="Tu rol"></div><small>Cada persona elige un rol distinto. Producto maneja la landing; los demás resuelven retos y le dictan las claves en voz alta.</small></div>
+    <p id="stMsg" class="msg" role="alert"></p>
+    <button id="stGo" class="btn primary" type="button">Entrar</button>
+    <p style="margin-top:18px"><button id="stReset" class="linkbtn" type="button">Borrar todo en este dispositivo</button></p>
+  </div>
+</div>
+
+<a class="jump" id="jump" href="#previewSec" hidden>Ver mi producto</a>
+<button id="evFab" class="evfab" type="button" aria-haspopup="dialog">⚡ Evento <span id="evBadge" hidden></span></button>
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+<div id="evDlg" class="evdlg" hidden role="dialog" aria-modal="true" aria-labelledby="evDlgTitle">
+  <div class="evbox">
+    <button id="evX" class="evx" type="button" aria-label="Cerrar">✕</button>
+    <div id="evStep1">
+      <h2 id="evDlgTitle">¿Salió un evento en la pantalla?</h2>
+      <p class="lead">Escribe el código que ves en la pantalla, por ejemplo <b>HK-01</b>. Da igual si usas mayúsculas o minúsculas, o si pones el guion.</p>
+      <input id="evQuick" type="text" inputmode="text" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="8" placeholder="HK-01" aria-label="Código del evento">
+      <p id="evQuickMsg" class="msg" role="status" aria-live="polite"></p>
+    </div>
+    <div id="evStep2" hidden></div>
+  </div>
+</div>
+
+<div class="app" id="app">
+
+  <aside class="side" aria-label="Pasos del equipo">
+    <h1 class="logo">tu_primera<span>_startup</span>/</h1>
+    <div class="who"><span id="whoText"></span><button id="btnChange" type="button">Cambiar rol o equipo</button><button id="btnResetAll" type="button">Reiniciar todo</button></div>
+    <nav class="nav" id="nav" aria-label="Archivos del proyecto"></nav>
+    <div class="prog" id="prog">
+      <p id="progText">0 de 5 rondas listas</p>
+      <div class="meter" aria-hidden="true"><i id="meter"></i></div>
+    </div>
+    <p class="v1ok" id="v1ok" hidden>Versión 1.0 lista</p>
+    <button id="btnClear" class="reset" type="button" hidden>Empezar de nuevo</button>
+  </aside>
+
+  <main class="editor" id="editor">
+
+    <!-- Capitán (Producto) -->
+    <section class="panel" data-panel="idea">
+      <h2>Elijan su problema y su idea</h2>
+      <p class="lead">Escriban lo que les choca de su día a día y conviértanlo en una idea de negocio digital.</p>
+      <label class="field"><span>Nombre del equipo</span><input type="text" data-k="team" autocomplete="off"></label>
+      <label class="field"><span>Problema que quieren resolver</span><textarea data-k="problem" placeholder="Por ejemplo: nunca sé qué cenar y termino pidiendo lo mismo"></textarea></label>
+      <label class="field"><span>¿Para quién es?</span><input type="text" data-k="who" placeholder="estudiantes de prepa" autocomplete="off"></label>
+      <label class="field"><span>¿Qué logra?</span><input type="text" data-k="what" placeholder="organizar sus tareas sin estrés" autocomplete="off"></label>
+      <label class="field"><span>¿Cómo lo hace?</span><input type="text" data-k="how" placeholder="con una app y recordatorios con IA" autocomplete="off"></label>
+      <div class="hint" id="ideaHint"></div>
+      <div class="bar2"><button class="btn primary" type="button" data-go="producto">Siguiente: Producto</button></div>
+    </section>
+
+    <section class="panel" data-panel="producto" hidden>
+      <h2>Ronda 1: armen su landing</h2>
+      <p class="lead">Llenen los campos y miren la página a la derecha. Meta: versión 1.0 lista al minuto 25.</p>
+      <label class="field"><span>Nombre de su startup</span><input type="text" data-k="name" autocomplete="off"></label>
+      <label class="field"><span>Slogan</span><input type="text" data-k="slogan" autocomplete="off"><small>Máximo 8 palabras.</small></label>
+      <label class="field"><span>Texto del botón principal</span><input type="text" data-k="cta" autocomplete="off"></label>
+      <label class="field"><span>Beneficio 1</span><input type="text" data-k="b1" autocomplete="off"></label>
+      <label class="field"><span>Beneficio 2</span><input type="text" data-k="b2" autocomplete="off"></label>
+      <label class="field"><span>Beneficio 3</span><input type="text" data-k="b3" autocomplete="off"></label>
+      <div class="field"><span>Estilo</span><div class="chipgroup" id="gStyle" role="radiogroup" aria-label="Estilo"></div></div>
+      <div class="field"><span>Ícono</span><div class="chipgroup emojis" id="gEmoji" role="radiogroup" aria-label="Ícono"></div></div>
+      <div class="field"><span>Formato del producto</span><small>Cada equipo recibe un formato distinto, pero lo pueden cambiar cuando quieran según lo que necesite su idea.</small></div>
+      <div class="group layouts" id="gLayout" role="radiogroup" aria-label="Formato del producto"></div>
+      <div class="bar2" style="margin-top:0;margin-bottom:18px"><button id="btnSurprise" class="btn" type="button">Sorpréndeme con otro formato</button></div>
+      <div class="bar2"><button class="btn" type="button" data-go="idea">Atrás</button><button class="btn primary" type="button" data-go="datos">Siguiente: Datos</button></div>
+    </section>
+
+    <section class="panel" data-panel="datos" hidden>
+      <h2>Ronda 2: ¿qué datos les ayudarían?</h2>
+      <div class="lockbox" id="lock-datos" hidden></div>
+      <div id="body-datos">
+        <p class="lead">Sus usuarios ya llegaron. ¿Qué datos mejorarían el negocio? Entre más datos pidan, más responsabilidad tienen de cuidarlos.</p>
+        <div class="group" id="gData"></div>
+        <label class="field"><span>¿Para qué usarían esos datos?</span><textarea data-k="dataWhy" placeholder="Para saber qué función mejorar primero"></textarea></label>
+        <div class="bar2"><button class="btn" type="button" data-go="producto">Atrás</button><button class="btn primary" type="button" data-go="infra">Siguiente: Infraestructura</button></div>
+      </div>
+    </section>
+
+    <section class="panel" data-panel="infra" hidden>
+      <h2>Ronda 3: dónde viven los datos y cómo los cuidan</h2>
+      <div class="lockbox" id="lock-infra" hidden></div>
+      <div id="body-infra">
+        <p class="lead">Alguien podría intentar hackearlos. Decidan dónde vive su producto y qué medidas toman.</p>
+        <div class="field"><span>¿Dónde vive su producto?</span></div>
+        <div class="group" id="gHost" role="radiogroup" aria-label="Dónde vive su producto"></div>
+        <div class="field"><span>¿Cómo lo protegen? Elijan las que apliquen.</span></div>
+        <div class="group" id="gSec"></div>
+        <div class="bar2"><button class="btn" type="button" data-go="datos">Atrás</button><button class="btn primary" type="button" data-go="futuro">Siguiente: Futuro</button></div>
+      </div>
+    </section>
+
+    <section class="panel" data-panel="futuro" hidden>
+      <h2>Ronda 4: ¿qué sigue?</h2>
+      <div class="lockbox" id="lock-futuro" hidden></div>
+      <div id="body-futuro">
+        <p class="lead">Si tuvieran un semestre más de desarrollo, ¿qué agregarían?</p>
+        <div class="group" id="gFuture" role="radiogroup" aria-label="Qué agregarían"></div>
+        <label class="field"><span>¿Por qué eligieron eso?</span><textarea data-k="futureWhy"></textarea></label>
+        <div class="bar2"><button class="btn" type="button" data-go="infra">Atrás</button><button class="btn primary" type="button" data-go="eventos">Siguiente: Eventos</button></div>
+      </div>
+    </section>
+
+    <!-- Compañeros: retos -->
+    <section class="panel" data-panel="rdatos" hidden>
+      <h2>Tu reto: la base de datos</h2>
+      <p class="lead">Tu equipo necesita datos para decidir. Resuelve la consulta de abajo y la base responderá con la clave de la ronda 2. Después, díctasela en voz alta a quien maneja la landing (rol Producto).</p>
+      <div id="sqlHost"></div>
+    </section>
+
+    <section class="panel" data-panel="rseg" hidden>
+      <h2>Tu reto: el mensaje cifrado</h2>
+      <p class="lead">Interceptaron un mensaje con la clave de la ronda 3. Cada letra se movió hacia adelante en el abecedario, siempre la misma cantidad de lugares. Gira la rueda hacia atrás hasta que el mensaje se pueda leer y díctale la clave a quien maneja la landing.</p>
+      <p class="lead" style="margin-bottom:6px">Mensaje cifrado</p>
+      <pre id="cipherText" class="term big"></pre>
+      <div class="wheel">
+        <button id="whMinus" class="btn" type="button" aria-label="Girar una letra menos">−</button>
+        <output id="shiftVal" aria-live="polite">0</output>
+        <button id="whPlus" class="btn" type="button" aria-label="Girar una letra más">+</button>
+        <span class="lead" style="margin:0">lugares hacia atrás</span>
+      </div>
+      <div class="alpha" id="alphaTop" aria-hidden="true"></div>
+      <div class="alpha" id="alphaBot" aria-hidden="true" style="margin-bottom:14px"></div>
+      <p class="lead" style="margin-bottom:6px">Mensaje descifrado</p>
+      <pre id="plainText" class="term big"></pre>
+      <pre id="segOut" class="term" aria-live="polite"></pre>
+    </section>
+
+    <section class="panel" data-panel="rpitch" hidden>
+      <h2>Tu reto: ordena el programa</h2>
+      <p class="lead">Estas líneas de pseudocódigo están desordenadas. Todo programa tiene una estructura: empieza, declara sus datos, decide con SI y SINO, y termina. Ordénalas con las flechas y ejecuta el programa para obtener la clave de la ronda 4.</p>
+      <ol id="pzList" class="pz"></ol>
+      <div class="bar2" style="margin-top:0"><button id="pzRun" class="btn primary" type="button">Ejecutar programa</button></div>
+      <pre id="pzOut" class="term" aria-live="polite" style="margin-top:14px"></pre>
+    </section>
+
+    <section class="panel" data-panel="ensayo" hidden>
+      <h2>Ensayo de pitch</h2>
+      <p class="lead">Ensaya el pitch de 60 segundos mientras el resto del equipo termina sus rondas. Anota aquí las ideas que quieras decir.</p>
+      <div class="rclock" id="rClock">01:00</div>
+      <div class="bar2" style="margin-top:0;margin-bottom:16px"><button id="rStart" class="btn primary" type="button">Iniciar</button><button id="rReset" class="btn" type="button">Reiniciar</button></div>
+      <label class="field"><span>Mis notas</span><textarea data-k="notes" rows="6"></textarea></label>
+    </section>
+
+    <section class="panel" data-panel="misiones" hidden>
+      <h2>Misiones de tu rol</h2>
+      <p class="lead">Mientras tu equipo avanza, completa misiones. Cada una te da un código de mejora: díctaselo a Producto y el producto del equipo se vuelve más fuerte. No hace falta hacerlas en orden.</p>
+      <div id="misHost"></div>
+    </section>
+
+    <section class="panel" data-panel="mejoras" hidden>
+      <h2>Mejoras de tu equipo</h2>
+      <p class="lead">Tus compañeros completan misiones y te dictan códigos de mejora. Escríbelos aquí para instalarlos: aparecen en tu producto (hallazgos y protecciones) o en tu guion de pitch (argumentos).</p>
+      <div class="codeinput">
+        <input id="mjCode" type="text" placeholder="NOVA-42" maxlength="16" autocomplete="off" aria-label="Código de mejora">
+        <button id="mjBtn" class="btn primary" type="button">Instalar mejora</button>
+      </div>
+      <p id="mjMsg" class="msg" role="status" aria-live="polite"></p>
+      <div id="mjList"></div>
+    </section>
+
+    <!-- Compartido -->
+    <section class="panel" data-panel="eventos" hidden>
+      <h2>Eventos del mercado</h2>
+      <p class="lead" id="evLead"></p>
+      <div class="codeinput">
+        <input id="evCode" type="text" placeholder="HK-01" maxlength="8" autocomplete="off" aria-label="Código del evento">
+        <button id="btnApply" class="btn primary" type="button">Aplicar evento</button>
+      </div>
+      <p id="evMsg" class="msg" role="status" aria-live="polite"></p>
+      <div id="evList"></div>
+      <div class="bar2" id="evNav"><button class="btn" type="button" data-go="futuro">Atrás</button><button class="btn primary" type="button" data-go="deploy">Siguiente: Deploy</button></div>
+    </section>
+
+    <section class="panel" data-panel="deploy" hidden>
+      <h2>Deploy: a producción</h2>
+      <p class="lead">Todo producto real pasa por un pipeline: instala, revisa, prueba, audita y publica. Si algo falla, sale el error y hay que arreglarlo. Equivocarse aquí es parte del trabajo, y casi siempre da risa después.</p>
+      <div class="bar2" style="margin-top:0"><button id="dpRun" class="btn primary" type="button">Ejecutar deploy</button><button id="dpClear" class="btn" type="button">Limpiar pantalla</button></div>
+      <pre id="dpOut" class="term" style="margin-top:14px;min-height:260px;max-height:380px" aria-live="off"></pre>
+      <div id="dpActions" class="fixbox" hidden></div>
+      <p id="dpStatus" class="dpstatus" role="status" aria-live="polite"></p>
+      <p id="dpScore" class="lead"></p>
+      <details class="hint"><summary>Modo becario</summary>
+        <div class="codeinput" style="margin-top:10px"><input id="dpForce" type="text" placeholder="Código maestro" autocomplete="off" aria-label="Código maestro"><button id="dpForceBtn" class="btn" type="button">Forzar deploy</button></div>
+      </details>
+      <div class="bar2"><button class="btn" type="button" data-go="eventos">Atrás</button><button class="btn primary" type="button" data-go="entrega">Siguiente: Entrega</button></div>
+    </section>
+
+    <section class="panel" data-panel="entrega" hidden>
+      <h2>Entrega: landing, video y pitch</h2>
+      <p class="lead">Todo se arma con lo que decidieron. Su becario les dice qué herramienta de IA usar y con qué cuenta.</p>
+      <ol class="steps">
+        <li>Descarguen su landing y guárdenla en la carpeta que indique su becario.</li>
+        <li>Copien el prompt del video y péguenlo en la herramienta de IA.</li>
+        <li>Mientras se genera, ensayen el guion del pitch.</li>
+      </ol>
+      <div class="bar2" style="margin-bottom:22px"><button id="btnDownload" class="btn primary" type="button">Descargar mi landing</button><button id="btnRefresh" class="btn" type="button">Actualizar textos con mis decisiones</button></div>
+      <div class="out"><h3>Prompt del video (8 segundos)</h3><p>Pégalo en la herramienta de IA que te indiquen.</p><textarea id="oVideo" readonly></textarea><div class="bar2"><button class="btn" type="button" data-copy="oVideo">Copiar</button></div></div>
+      <div class="out"><h3>Plan B: pantallas en imagen</h3><p>Úsalo si el video no se genera a tiempo.</p><textarea id="oImg" readonly></textarea><div class="bar2"><button class="btn" type="button" data-copy="oImg">Copiar</button></div></div>
+      <div class="out"><h3>Guion del pitch (60 segundos)</h3><p>Puedes editarlo antes de ensayar.</p><textarea id="oPitch"></textarea><div class="count" id="pitchCount"></div><div class="bar2"><button class="btn" type="button" data-copy="oPitch">Copiar</button></div></div>
+      <div class="out"><h3>Prompt para mejorar los textos</h3><p>Opcional: pide nombres, slogans y beneficios alternativos.</p><textarea id="oTexts" readonly></textarea><div class="bar2"><button class="btn" type="button" data-copy="oTexts">Copiar</button></div></div>
+      <div class="out"><h3>Post-mortem del deploy</h3><p>Documento típico de ingeniería: qué falló, por qué y cómo lo arreglaron. Sirve para el pitch.</p><textarea id="oPost" readonly></textarea><div class="bar2"><button class="btn" type="button" data-copy="oPost">Copiar</button></div></div>
+      <div class="out"><h3>README.md de su proyecto</h3><p>Es lo primero que se ve en un repositorio.</p><textarea id="oReadme" readonly></textarea><div class="bar2"><button class="btn" type="button" data-copy="oReadme">Copiar</button></div></div>
+      <p id="copyMsg" class="msg ok" role="status" aria-live="polite"></p>
+      <div class="bar2"><button class="btn" type="button" data-go="deploy">Atrás</button></div>
+    </section>
+
+  </main>
+
+  <section class="preview" id="previewSec" aria-label="Vista previa de la landing">
+    <div class="chrome">
+      <div class="dots" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div class="url" id="url">tu-startup.app</div>
+      <div class="ver2" id="ver">v1.0</div>
+    </div>
+    <div class="pframe" id="pframe"><iframe id="frame" title="Vista previa de tu landing" sandbox="allow-same-origin"></iframe></div>
+    <div class="prevbar"><span>La vista se actualiza mientras escribes.</span><a href="#editor">Volver a editar</a></div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+'use strict';
+
+/* Catálogo de eventos: mismos códigos que la página admin. tw = giro según el número de equipo. */
+var EVENTS=[
+ {c:'HK-01',t:'perjudica',title:'Filtración de datos',desc:'Una startup parecida a la de ustedes sufrió un hackeo y se filtraron los datos de sus usuarios. Los usuarios de ustedes preguntan si sus datos están seguros.',ask:'¿Qué medida de seguridad anuncian hoy y qué dato dejan de guardar?',tw:['El hackeo afectó los inicios de sesión: hay contraseñas expuestas.','Se filtraron los pagos: hay tarjetas en riesgo.','Se filtraron mensajes privados entre usuarios.']},
+ {c:'LY-02',t:'perjudica',title:'Nueva ley de datos personales',desc:'Entra en vigor una ley que exige aviso de privacidad y consentimiento claro para guardar datos de las personas.',ask:'¿Qué datos dejan de pedir y cómo piden el consentimiento?',tw:['La ley exige borrar los datos de una persona si lo pide, en 24 horas.','La ley prohíbe guardar datos de menores de edad sin permiso de sus tutores.','La ley exige guardar los datos dentro del país.']},
+ {c:'IA-03',t:'ayuda',title:'Sale una IA gratuita',desc:'Una nueva herramienta de IA gratuita automatiza tareas que antes eran manuales.',ask:'¿Qué parte de su producto automatizan con ella?',tw:['Puede escribir textos por ti.','Puede recomendar contenido distinto a cada usuario.','Puede atender el chat de soporte las 24 horas.']},
+ {c:'CP-04',t:'perjudica',title:'Llega un competidor gigante',desc:'Una empresa enorme lanza un servicio casi igual al de ustedes, con mucha publicidad.',ask:'¿Qué los hace distintos y qué anuncian para destacar?',tw:['Su servicio es gratis durante un año.','Tiene millones de usuarios desde el primer día.','Copió tu función principal.']},
+ {c:'IV-05',t:'ayuda',title:'Un inversionista te escribe',desc:'Una persona inversionista quiere conocer su producto, pero pide ver números antes de hablar.',ask:'¿Qué 3 métricas le muestran?',tw:['Quiere saber cuántos usuarios regresan cada semana.','Pregunta cuánto cuesta conseguir a cada usuario.','Pide ver un prototipo funcionando mañana.']},
+ {c:'NB-06',t:'perjudica',title:'Se cae la nube',desc:'El proveedor de nube donde vive su app tuvo una caída de varias horas y nadie pudo entrar.',ask:'¿Qué cambian para que no vuelva a pasar?',tw:['La caída ocurrió en su mejor día de ventas.','Se perdieron los datos de un día completo.','La caída fue en otra región, pero igual los afectó.']},
+ {c:'VI-07',t:'ayuda',title:'Te vuelves viral',desc:'Una persona influencer mostró su producto y llegaron diez veces más usuarios de golpe.',ask:'¿Qué parte del sistema se satura y cómo la preparan?',tw:['Llegaron diez veces más usuarios en una sola hora.','Muchos de los nuevos usuarios son de otro país y otro idioma.','El video viral muestra un error de su app.']},
+ {c:'RA-08',t:'ayuda',title:'Boom de realidad aumentada',desc:'Los lentes de realidad aumentada bajan de precio y todo el mundo quiere usarlos.',ask:'¿Cómo aprovechan la realidad aumentada en su producto?',tw:['Los usuarios piden probar los productos en su propio cuarto.','Un competidor ya lanzó su versión en realidad aumentada.','Los lentes siguen siendo caros y pocos los tienen.']},
+ {c:'AP-09',t:'ayuda',title:'Apoyo a startups con IA responsable',desc:'Se anuncia un apoyo económico para startups que usan IA de forma transparente y responsable.',ask:'¿Qué hacen para demostrar que usan la IA de forma responsable?',tw:['Piden explicar cómo decide su IA.','Piden que una persona revise las decisiones importantes.','Piden avisar a los usuarios cuándo hablan con una IA.']},
+ {c:'FK-10',t:'perjudica',title:'Cuentas falsas',desc:'Detectan miles de cuentas falsas que se están registrando en su plataforma.',ask:'¿Cómo verifican que sus usuarios son reales?',tw:['Las cuentas falsas dejan reseñas falsas.','Las cuentas falsas gastan sus cupones.','Las cuentas falsas saturan su servidor.']},
+ {c:'DT-11',t:'ayuda',title:'Tus datos te sorprenden',desc:'Sus datos muestran que un grupo de personas que no esperaban usa su producto más que nadie.',ask:'¿Qué nueva función o mercado exploran?',tw:['Son personas adultas mayores.','Son personas de otra ciudad.','Lo usan de madrugada.']},
+ {c:'UP-12',t:'perjudica',title:'Una actualización lo rompe',desc:'Subieron una actualización y el botón principal dejó de funcionar para todos.',ask:'¿Qué proceso de pruebas agregan antes de publicar?',tw:['Pasó justo antes de una demo con un cliente.','Nadie sabe qué cambio causó el error.','El error solo ocurre en celulares.']}
+];
+
+/* Roles, tamaños y quién guarda la llave de cada ronda */
+var ROLES={
+ producto:{name:'Producto',desc:'Maneja la landing, decide con el equipo y recibe las claves.',ask:'¿Qué cambia en la landing?'},
+ datos:{name:'Datos',desc:'Resuelve el reto de la base de datos y dicta la clave de la ronda 2.',ask:'¿Qué dato afecta o ayuda aquí?'},
+ seguridad:{name:'Seguridad',desc:'Descifra el mensaje y dicta la clave de la ronda 3.',ask:'¿Qué riesgo ves?'},
+ pitch:{name:'Pitch',desc:'Ordena el programa del futuro, dicta la clave de la ronda 4 y ensaya el pitch.',ask:'¿Cómo se lo cuentan a un cliente en 10 segundos?'},
+ tecnico:{name:'Técnico',desc:'Resuelve los retos de datos y de seguridad y dicta las claves de las rondas 2 y 3.',ask:'¿Qué dato y qué riesgo ves?'}
+};
+var SIZES={1:['producto'],2:['producto','tecnico'],3:['producto','datos','seguridad'],4:['producto','datos','seguridad','pitch']};
+var HOLDER={
+ 1:{datos:null,infra:null,futuro:null},
+ 2:{datos:'tecnico',infra:'tecnico',futuro:null},
+ 3:{datos:'datos',infra:'seguridad',futuro:null},
+ 4:{datos:'datos',infra:'seguridad',futuro:'pitch'}
+};
+var ROUND_N={datos:2,infra:3,futuro:4};
+var WORDS=['NOVA','PIXEL','BYTE','LOGIN','RUTA','NUBE','DATO','CHIP','REDES','LINUX','CODIGO','CLAVE'];
+var MASTER='MAESTRO-TIND';
+
+function keyFor(num,round){var w=WORDS[(num*5+round*3)%WORDS.length],n=((num*7+round*11)%90)+10;return w+'-'+n;}
+function nk(s){return String(s||'').toUpperCase().replace(/[^A-Z0-9]/g,'');}
+
+var NAV=[
+ {id:'idea',file:'idea.md',label:'Idea'},
+ {id:'producto',file:'producto.html',label:'Producto'},
+ {id:'datos',file:'datos.sql',label:'Datos'},
+ {id:'infra',file:'infra.yml',label:'Infra y seguridad'},
+ {id:'futuro',file:'futuro.todo',label:'Futuro'},
+ {id:'mejoras',file:'mejoras.log',label:'Mejoras'},
+ {id:'eventos',file:'eventos.log',label:'Eventos'},
+ {id:'deploy',file:'deploy.sh',label:'Deploy'},
+ {id:'entrega',file:'pitch.txt',label:'Entrega'}
+];
+var SECTION_OF={idea:'top',producto:'top',datos:'datos',infra:'seguridad',futuro:'futuro',eventos:'novedades',mejoras:'hallazgos',deploy:'top',entrega:'top'};
+
+var THEMES={
+ moderno:{label:'Moderno',bg:'#0F172A',fg:'#F8FAFC',sub:'#CBD5E1',card:'#1E293B',accent:'#38BDF8',btn:'#0F172A',desc:'estilo moderno, fondo azul oscuro y acentos celestes'},
+ divertido:{label:'Divertido',bg:'#FFF4E0',fg:'#2B2118',sub:'#5A4636',card:'#FFFFFF',accent:'#FF6B35',btn:'#2B2118',desc:'estilo divertido, colores cálidos y formas redondeadas'},
+ serio:{label:'Serio',bg:'#F5F5F0',fg:'#1B263B',sub:'#44506A',card:'#FFFFFF',accent:'#1B4965',btn:'#FFFFFF',desc:'estilo serio y profesional, tonos azul marino sobre fondo claro'},
+ futurista:{label:'Futurista',bg:'#0B0014',fg:'#F5E9FF',sub:'#D2BFE6',card:'#1A0A2E',accent:'#B14CFF',btn:'#0B0014',desc:'estilo futurista, fondo casi negro con acentos neón morados'}
+};
+var EMOJIS=['🚀','🛒','📚','🎮','🍔','🧠','🌎','💡','🎧','🧳','🩺','🐾'];
+var DATA_OPTS=['Qué funciones usan más','Cuánto tiempo usan la app','Qué compran o piden','Dónde se encuentran (ubicación)','Opiniones y calificaciones','Cuántas personas regresan'];
+var HOSTS=[['en la nube pública','Nube pública (un gran proveedor)'],['en una nube privada','Nube privada (solo para nosotros)'],['en un servidor propio','Un servidor propio']];
+var SEC_OPTS=['Contraseñas seguras y verificación en dos pasos','Cifrado de los datos','Copias de respaldo automáticas','Aviso de privacidad y consentimiento','Monitoreo de accesos sospechosos'];
+var FUTURE=['App móvil','IA más avanzada','Realidad aumentada','Otra idea'];
+
+var KEY='tps_team_v3';
+var DEF={sqlW:null,ch:{},evOk:{},ms:{},upg:{},layout:'',deploy:{tries:0,errors:0,chaosFixed:false,ok:false,hist:[]},num:1,size:0,role:'',joined:false,unlocked:[],solved:{datos:false,seg:false,pitch:false},sqlText:'',shift:0,pz:null,notes:'',
+ team:'',problem:'',who:'',what:'',how:'',name:'',slogan:'',cta:'Probar ahora',b1:'',b2:'',b3:'',style:'moderno',emoji:'🚀',data:[],dataWhy:'',host:'',sec:[],future:'',futureWhy:'',events:[]};
+var S=JSON.parse(JSON.stringify(DEF));
+try{var raw=localStorage.getItem(KEY);if(raw){S=Object.assign(S,JSON.parse(raw));}}catch(e){}
+if(!S.deploy||!S.deploy.hist){S.deploy=JSON.parse(JSON.stringify(DEF.deploy));}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function t(s){return (s||'').trim();}
+function evByCode(c){for(var i=0;i<EVENTS.length;i++){if(EVENTS[i].c===c)return EVENTS[i];}return null;}
+function twistOf(ev){return ev.tw[(S.num-1)%3];}
+function benefits(){return [S.b1,S.b2,S.b3].map(t).filter(Boolean);}
+function isCaptain(){return S.role==='producto';}
+function ideaLine(){
+  if(t(S.who)&&t(S.what)){return 'Una plataforma que ayuda a '+t(S.who)+' a '+t(S.what)+(t(S.how)?' '+(/^(con|mediante|usando|a través)/i.test(t(S.how))?t(S.how):'mediante '+t(S.how)):'')+'.';}
+  return 'Completa quién, qué y cómo para ver tu idea en una frase.';
+}
+
+/* Candados */
+function holderOf(r){return (HOLDER[S.size]||HOLDER[1])[r];}
+function isOpen(r){return !holderOf(r)||S.unlocked.indexOf(r)!==-1;}
+function done(id){
+  switch(id){
+    case 'idea':return !!(t(S.team)&&t(S.problem)&&t(S.who)&&t(S.what));
+    case 'producto':return !!(t(S.name)&&t(S.slogan)&&benefits().length>=3);
+    case 'datos':return !!(isOpen('datos')&&S.data.length&&t(S.dataWhy));
+    case 'infra':return !!(isOpen('infra')&&S.host&&S.sec.length);
+    case 'futuro':return !!(isOpen('futuro')&&S.future&&t(S.futureWhy));
+    case 'eventos':return !!(S.events.length&&S.events.every(function(e){return t(e.d);}));
+    case 'deploy':return !!S.deploy.ok;
+    case 'rdatos':return !!S.solved.datos;
+    case 'rseg':return !!S.solved.seg;
+    case 'rpitch':return !!S.solved.pitch;
+    default:return false;
+  }
+}
+function buildLocks(){
+  ['datos','infra','futuro'].forEach(function(r){
+    var box=$('lock-'+r);
+    box.innerHTML='<h3>Ronda bloqueada</h3><p>Para abrirla, pídele la clave al rol <b id="lw-'+r+'"></b> de tu equipo. Tiene que dictártela en voz alta.</p>'+
+      '<div class="codeinput"><input type="text" id="lk-'+r+'" placeholder="NOVA-42" maxlength="16" autocomplete="off" aria-label="Clave de la ronda"><button type="button" class="btn primary" id="lb-'+r+'">Desbloquear</button></div>'+
+      '<p class="msg" id="lm-'+r+'" role="status" aria-live="polite"></p>';
+    function tryUnlock(){
+      var v=nk($('lk-'+r).value),m=$('lm-'+r);
+      if(v&&(v===nk(keyFor(S.num,ROUND_N[r]))||v===nk(MASTER))){
+        if(S.unlocked.indexOf(r)===-1)S.unlocked.push(r);
+        save();renderLocks();renderNav();
+      }else{m.textContent='Esa clave no coincide con la de tu equipo. '+quip('lock');}
+    }
+    $('lb-'+r).onclick=tryUnlock;
+    $('lk-'+r).addEventListener('keydown',function(e){if(e.key==='Enter')tryUnlock();});
+  });
+}
+function renderLocks(){
+  ['datos','infra','futuro'].forEach(function(r){
+    var open=isOpen(r);
+    $('lock-'+r).hidden=open;$('body-'+r).hidden=!open;
+    if(!open){$('lw-'+r).textContent=ROLES[holderOf(r)].name;}
+  });
+}
+
+/* Landing: seis formatos de producto */
+var LAYOUTS={
+ clasica:{label:'Landing clásica',desc:'Página web con portada, beneficios y novedades.',video:'una página web que se recorre hacia abajo'},
+ app:{label:'App móvil',desc:'Pantallas de celular con barra de navegación.',video:'una app móvil mostrada en varios teléfonos'},
+ tablero:{label:'Tablero de datos',desc:'Panel con métricas, gráficas y estado del sistema.',video:'un tablero con gráficas y estado del sistema'},
+ tienda:{label:'Tienda en línea',desc:'Catálogo con tarjetas, calificaciones y compra segura.',video:'una tienda en línea con catálogo de productos'},
+ comunidad:{label:'Red de comunidad',desc:'Feed de publicaciones con tendencias y reglas de privacidad.',video:'una red social con feed de publicaciones'},
+ terminal:{label:'Terminal para devs',desc:'Herramienta de línea de comandos con README y changelog.',video:'una terminal de comandos con texto verde sobre fondo negro'}
+};
+var LAYOUT_KEYS=['clasica','app','tablero','tienda','comunidad','terminal'];
+function layoutOf(){return (S.layout&&LAYOUTS[S.layout])?S.layout:LAYOUT_KEYS[(S.num-1)%LAYOUT_KEYS.length];}
+function prand(i){var x=Math.sin((S.num*97+i*31+1)*12.9898)*43758.5453;return x-Math.floor(x);}
+function lastVersion(){var n=0;S.events.forEach(function(e,i){if(t(e.d))n=i+1;});return 'v1.'+n;}
+function versionList(name){
+  var arr=[{v:'v1.0',x:'Lanzamiento de '+name+'.'}];
+  S.events.forEach(function(e,i){if(!t(e.d))return;var ev=evByCode(e.c);arr.push({v:'v1.'+(i+1),x:'Ajuste por «'+(ev?ev.title:e.c)+'»: '+t(e.d)});});
+  return arr;
+}
+function each(arr,fn){return arr.map(fn).join('');}
+function cmdOf(b){return slug(b).split('-').slice(0,2).join('-').slice(0,16)||'accion';}
+var FOOT='Hecho en el taller Tu Primera Startup, TIND Anáhuac Querétaro';
+
+var RENDER={};
+
+RENDER.clasica=function(D){var th=D.th;
+  var css='body{background:'+th.bg+';color:'+th.fg+'}.w{max-width:960px;margin:0 auto;padding:0 24px}header{display:flex;justify-content:space-between;align-items:center;padding:18px 24px;max-width:960px;margin:0 auto}'+
+  '.logo{font-weight:800;font-size:20px}header a{color:'+th.sub+';text-decoration:none;font-size:15px}'+
+  '.hero{display:grid;grid-template-columns:1.3fr 1fr;gap:28px;align-items:center;padding:36px 0 52px}'+
+  'h1{font-size:clamp(30px,5vw,50px);line-height:1.1;margin:0 0 14px}.lead{color:'+th.sub+';font-size:19px;margin:0 0 22px}'+
+  '.cta{display:inline-block;background:'+th.accent+';color:'+th.btn+';font-weight:700;padding:14px 26px;border-radius:12px;text-decoration:none}'+
+  '.art{font-size:clamp(90px,16vw,160px);text-align:center;background:'+th.card+';border-radius:28px;padding:24px;line-height:1.1}'+
+  'section{padding:30px 0}h2{font-size:26px;margin:0 0 16px}'+
+  '.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}.card{background:'+th.card+';border-radius:16px;padding:20px}'+
+  '.chips{display:flex;flex-wrap:wrap;gap:8px;padding:0;margin:0;list-style:none}.chips li{background:'+th.card+';border:1px solid '+th.accent+';border-radius:999px;padding:6px 14px}'+
+  '.list{list-style:none;padding:0;margin:0;display:grid;gap:8px}.list li{background:'+th.card+';border-radius:12px;padding:12px 16px}'+
+  '.ver b{color:'+th.accent+'}.muted{color:'+th.sub+'}footer{padding:30px 24px 50px;text-align:center;color:'+th.sub+';font-size:14px}'+
+  '@media(max-width:640px){.hero{grid-template-columns:1fr}}';
+  var h='<header><div class="logo">'+esc(D.emoji)+' '+esc(D.name)+'</div><a href="#beneficios">Beneficios</a></header>';
+  h+='<div class="w" id="top"><div class="hero"><div><h1>'+esc(D.slogan)+'</h1><p class="lead">'+esc(D.line)+'</p><a class="cta" href="#beneficios">'+esc(D.cta)+'</a></div><div class="art" aria-hidden="true">'+esc(D.emoji)+'</div></div>';
+  h+='<section id="beneficios"><h2>Por qué elegirnos</h2>'+(D.bens.length?'<div class="cards">'+each(D.bens,function(b){return '<div class="card">'+esc(b)+'</div>';})+'</div>':'<p class="muted">Aquí aparecerán tus beneficios.</p>')+'</section>';
+  if(D.data.length||D.dataWhy){h+='<section id="datos"><h2>Lo que aprendemos para mejorar</h2><ul class="chips">'+each(D.data,function(d){return '<li>'+esc(d)+'</li>';})+'</ul>'+(D.dataWhy?'<p class="muted" style="margin-top:12px">'+esc(D.dataWhy)+'</p>':'')+'</section>';}
+  if(D.finds.length){h+='<section id="hallazgos"><h2>Lo que descubrimos</h2><ul class="list">'+each(D.finds,function(x){return '<li>'+esc(x)+'</li>';})+'</ul></section>';}
+  if(D.host||D.sec.length){h+='<section id="seguridad"><h2>Cómo cuidamos tu información</h2>'+(D.host?'<p class="muted" style="margin:0 0 12px">Nuestro producto vive '+esc(D.host)+'.</p>':'')+'<ul class="list">'+each(D.sec,function(s){return '<li>✓ '+esc(s)+'</li>';})+'</ul></section>';}
+  if(D.future){h+='<section id="futuro"><h2>Lo que viene</h2><div class="card"><b>'+esc(D.future)+'</b>'+(D.futureWhy?'<p class="muted" style="margin:8px 0 0">'+esc(D.futureWhy)+'</p>':'')+'</div></section>';}
+  h+='<section id="novedades"><h2>Novedades</h2><ul class="list">'+each(D.vers,function(x){return '<li class="ver"><b>'+x.v+'</b> '+esc(x.x)+'</li>';})+'</ul></section></div><footer>'+FOOT+'</footer>';
+  return {css:css,html:h};
+};
+
+RENDER.app=function(D){var th=D.th;
+  var css='body{background:linear-gradient(160deg,'+th.bg+','+th.card+');color:'+th.fg+';min-height:100vh}'+
+  '.top{max-width:900px;margin:0 auto;padding:34px 24px 6px;text-align:center}.top h1{font-size:clamp(30px,5vw,48px);line-height:1.1;margin:0 0 10px}.top p{color:'+th.sub+';margin:0 0 18px;font-size:18px}'+
+  '.cta{display:inline-block;background:'+th.accent+';color:'+th.btn+';font-weight:700;padding:13px 26px;border-radius:999px;text-decoration:none}'+
+  '.stage{display:flex;flex-wrap:wrap;gap:28px;justify-content:center;padding:30px 16px 20px}'+
+  '.phone{width:250px;min-height:500px;border-radius:34px;background:'+th.bg+';border:7px solid rgba(128,128,128,.55);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 18px 40px rgba(0,0,0,.25)}'+
+  '.pbar{display:flex;align-items:center;gap:8px;padding:16px;background:'+th.accent+';color:'+th.btn+';font-weight:800}'+
+  '.pbody{flex:1;padding:14px;display:grid;gap:10px;align-content:start}.pc{background:'+th.card+';border-radius:14px;padding:12px;font-size:14px}'+
+  '.pbig{font-size:54px;text-align:center}.pt{font-size:20px;font-weight:800;line-height:1.2}.pill{display:inline-block;background:'+th.accent+';color:'+th.btn+';border-radius:999px;padding:8px 16px;font-weight:700;font-size:14px;justify-self:start}'+
+  '.tabs{display:flex;justify-content:space-around;padding:10px 6px;border-top:1px solid rgba(128,128,128,.35);font-size:12px;color:'+th.sub+'}.tabs b{color:'+th.accent+'}'+
+  '.mini{display:flex;flex-wrap:wrap;gap:6px}.mini span{background:'+th.bg+';border:1px solid '+th.accent+';border-radius:999px;padding:3px 10px;font-size:12px}'+
+  '.sec{max-width:760px;margin:0 auto;padding:18px 24px}.sec h2{font-size:24px;margin:0 0 12px}.list{list-style:none;padding:0;margin:0;display:grid;gap:8px}.list li{background:'+th.card+';border-radius:12px;padding:12px 16px}.list b{color:'+th.accent+'}.muted{color:'+th.sub+'}'+
+  'footer{padding:26px 24px 46px;text-align:center;color:'+th.sub+';font-size:14px}';
+  function tabs(on){return '<div class="tabs">'+['Inicio','Funciones','Seguridad'].map(function(n){return n===on?'<b>'+n+'</b>':'<span>'+n+'</span>';}).join('')+'</div>';}
+  var h='<div class="top" id="top"><h1>'+esc(D.name)+'</h1><p>'+esc(D.slogan)+'. '+esc(D.line)+'</p><a class="cta" href="#pantallas">'+esc(D.cta)+'</a></div><div class="stage" id="pantallas">';
+  h+='<div class="phone"><div class="pbar">'+esc(D.emoji)+' '+esc(D.name)+'</div><div class="pbody"><div class="pbig">'+esc(D.emoji)+'</div><div class="pt">'+esc(D.slogan)+'</div><div class="pc">'+esc(D.line)+'</div><span class="pill">'+esc(D.cta)+'</span></div>'+tabs('Inicio')+'</div>';
+  h+='<div class="phone"><div class="pbar">Funciones</div><div class="pbody">'+(D.bens.length?each(D.bens,function(b){return '<div class="pc">✓ '+esc(b)+'</div>';}):'<div class="pc">Aquí aparecerán tus funciones.</div>')+'</div>'+tabs('Funciones')+'</div>';
+  h+='<div class="phone" id="seguridad"><div class="pbar">Seguridad</div><div class="pbody">'+(D.host?'<div class="pc">Vive '+esc(D.host)+'.</div>':'')+each(D.sec,function(s){return '<div class="pc">✓ '+esc(s)+'</div>';})+(D.data.length?'<div class="pc" id="datos">Lo que medimos<div class="mini" style="margin-top:8px">'+each(D.data,function(d){return '<span>'+esc(d)+'</span>';})+'</div></div>':'')+((!D.host&&!D.sec.length&&!D.data.length)?'<div class="pc">Aquí aparecerá tu seguridad.</div>':'')+'</div>'+tabs('Seguridad')+'</div>';
+  h+='</div>';
+  if(D.finds.length)h+='<div class="sec" id="hallazgos"><h2>Lo que descubrimos</h2><ul class="list">'+each(D.finds,function(x){return '<li>'+esc(x)+'</li>';})+'</ul></div>';
+  if(D.future)h+='<div class="sec" id="futuro"><h2>Próximamente</h2><ul class="list"><li><b>'+esc(D.future)+'</b>'+(D.futureWhy?'<br><span class="muted">'+esc(D.futureWhy)+'</span>':'')+'</li></ul></div>';
+  h+='<div class="sec" id="novedades"><h2>Notas de la versión</h2><ul class="list">'+each(D.vers,function(x){return '<li><b>'+x.v+'</b> '+esc(x.x)+'</li>';})+'</ul></div><footer>'+FOOT+'</footer>';
+  return {css:css,html:h};
+};
+
+RENDER.tablero=function(D){var th=D.th;
+  var css='body{background:'+th.bg+';color:'+th.fg+'}.bar{display:flex;justify-content:space-between;align-items:center;padding:16px 24px;border-bottom:1px solid rgba(128,128,128,.3)}.bar b{font-size:20px}'+
+  '.badge{background:'+th.accent+';color:'+th.btn+';border-radius:999px;padding:4px 12px;font-size:13px;font-weight:700}.wrap{max-width:1040px;margin:0 auto;padding:24px}'+
+  'h1{font-size:clamp(26px,4vw,40px);line-height:1.1;margin:0 0 6px}.sub{color:'+th.sub+';margin:0 0 18px}'+
+  '.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}.kpi{background:'+th.card+';border-radius:14px;padding:16px}.kpi small{color:'+th.sub+'}.kpi strong{display:block;font-size:30px}'+
+  'h2{font-size:20px;margin:30px 0 12px}.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}.tile{background:'+th.card+';border-radius:14px;padding:16px}'+
+  '.bars{display:flex;align-items:flex-end;gap:6px;height:70px;margin-top:10px}.bars i{flex:1;background:'+th.accent+';border-radius:4px 4px 0 0;display:block}'+
+  '.status{display:grid;gap:8px}.status div{background:'+th.card+';border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;gap:12px}.ok{color:'+th.accent+';font-weight:700}'+
+  '.note{color:'+th.sub+';font-size:13px}.list{list-style:none;padding:0;margin:0;display:grid;gap:8px}.list li{background:'+th.card+';border-radius:10px;padding:10px 14px}.list b{color:'+th.accent+'}'+
+  'footer{padding:26px 24px 46px;text-align:center;color:'+th.sub+';font-size:14px}';
+  var h='<div class="bar" id="top"><b>'+esc(D.emoji)+' '+esc(D.name)+'</b><span class="badge">'+esc(D.ver)+'</span></div><div class="wrap"><h1>'+esc(D.slogan)+'</h1><p class="sub">'+esc(D.line)+'</p>';
+  h+='<div class="kpis"><div class="kpi"><small>Usuarios activos</small><strong>'+(Math.floor(prand(1)*900)+300)+'</strong></div><div class="kpi"><small>Satisfacción</small><strong>'+(88+Math.floor(prand(2)*11))+'%</strong></div><div class="kpi"><small>Visitas hoy</small><strong>'+(Math.floor(prand(3)*4000)+800)+'</strong></div><div class="kpi"><small>Tiempo de respuesta</small><strong>'+(80+Math.floor(prand(4)*120))+' ms</strong></div></div><p class="note">Los números son de ejemplo.</p>';
+  h+='<h2 id="datos">Lo que medimos</h2><div class="tiles">'+(D.data.length?each(D.data,function(d,i){var bars='';for(var k=0;k<7;k++){bars+='<i style="height:'+(25+Math.floor(prand(i*7+k+10)*75))+'%"></i>';}return '<div class="tile"><b>'+esc(d)+'</b><div class="bars" aria-hidden="true">'+bars+'</div></div>';}):'<div class="tile">Aquí aparecerán tus métricas.</div>')+'</div>';
+  if(D.finds.length)h+='<h2 id="hallazgos">Hallazgos</h2><ul class="list">'+each(D.finds,function(x){return '<li>'+esc(x)+'</li>';})+'</ul>';
+  h+='<h2 id="seguridad">Estado del sistema</h2><div class="status"><div><span>Servidor</span><span class="ok">'+(D.host?esc(D.host)+': en línea':'sin definir: pendiente')+'</span></div>'+each(D.sec,function(s){return '<div><span>'+esc(s)+'</span><span class="ok">activo</span></div>';})+'</div>';
+  if(D.future)h+='<h2 id="futuro">En el roadmap</h2><div class="tile"><b>'+esc(D.future)+'</b>'+(D.futureWhy?'<p class="note" style="margin:6px 0 0">'+esc(D.futureWhy)+'</p>':'')+'</div>';
+  h+='<h2 id="novedades">Versiones</h2><ul class="list">'+each(D.vers,function(x){return '<li><b>'+x.v+'</b> '+esc(x.x)+'</li>';})+'</ul></div><footer>'+FOOT+'</footer>';
+  return {css:css,html:h};
+};
+
+RENDER.tienda=function(D){var th=D.th;
+  var css='body{background:'+th.bg+';color:'+th.fg+'}.wrap{max-width:1000px;margin:0 auto;padding:0 24px}.hd{display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:18px 0}.hd b{font-size:20px}'+
+  '.search{flex:1;min-width:180px;max-width:420px;padding:10px 16px;border-radius:999px;border:1px solid rgba(128,128,128,.5);background:'+th.card+';color:'+th.sub+'}.cart{background:'+th.accent+';color:'+th.btn+';border-radius:999px;padding:8px 16px;font-weight:700}'+
+  '.banner{border-radius:22px;background:'+th.accent+';color:'+th.btn+';padding:34px 28px;margin:6px 0 10px}.banner h1{font-size:clamp(28px,4.5vw,44px);line-height:1.1;margin:0 0 8px}.banner p{margin:0;font-size:18px}'+
+  'h2{font-size:24px;margin:30px 0 14px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px}.prod{background:'+th.card+';border-radius:16px;padding:18px;display:grid;gap:8px;align-content:start}'+
+  '.pic{font-size:56px;text-align:center;background:'+th.bg+';border-radius:12px;padding:12px}.stars{color:'+th.accent+';font-weight:700}.price{font-size:22px;font-weight:800}.small{color:'+th.sub+';font-size:13px}'+
+  '.add{background:'+th.accent+';color:'+th.btn+';border:0;border-radius:10px;padding:10px;font-weight:700;font:inherit;font-weight:700}'+
+  '.trust{display:flex;flex-wrap:wrap;gap:8px;list-style:none;padding:0;margin:0}.trust li{border:1px solid '+th.accent+';border-radius:999px;padding:6px 14px}.muted{color:'+th.sub+'}'+
+  '.list{list-style:none;padding:0;margin:0;display:grid;gap:8px}.list li{background:'+th.card+';border-radius:10px;padding:10px 14px}.list b{color:'+th.accent+'}footer{padding:26px 24px 46px;text-align:center;color:'+th.sub+';font-size:14px}';
+  var h='<div class="wrap" id="top"><div class="hd"><b>'+esc(D.emoji)+' '+esc(D.name)+'</b><div class="search">Buscar en '+esc(D.name)+'...</div><span class="cart">Carrito (0)</span></div>';
+  h+='<div class="banner"><h1>'+esc(D.slogan)+'</h1><p>'+esc(D.line)+'</p></div><h2>Lo más pedido</h2><div class="grid">';
+  h+=D.bens.length?each(D.bens,function(b,i){var r=(4+prand(i+3)).toFixed(1);return '<div class="prod"><div class="pic" aria-hidden="true">'+esc(D.emoji)+'</div><b>'+esc(b)+'</b><div class="stars">★ '+r+' de 5</div><div class="small">'+(Math.floor(prand(i+20)*400)+40)+' reseñas de ejemplo</div><div class="price">$'+(Math.floor(prand(i+5)*180)+49)+'</div><button class="add" type="button">'+esc(D.cta)+'</button></div>';}):'<div class="prod">Aquí aparecerán tus productos.</div>';
+  h+='</div>';
+  if(D.data.length)h+='<h2 id="datos">Personalizamos según</h2><ul class="trust">'+each(D.data,function(d){return '<li>'+esc(d)+'</li>';})+'</ul>'+(D.dataWhy?'<p class="muted">'+esc(D.dataWhy)+'</p>':'');
+  if(D.finds.length)h+='<h2 id="hallazgos">Lo que aprendimos de nuestros clientes</h2><ul class="list">'+each(D.finds,function(x){return '<li>'+esc(x)+'</li>';})+'</ul>';
+  if(D.host||D.sec.length)h+='<h2 id="seguridad">Compra segura</h2>'+(D.host?'<p class="muted">Nuestra tienda vive '+esc(D.host)+'.</p>':'')+'<ul class="trust">'+each(D.sec,function(s){return '<li>✓ '+esc(s)+'</li>';})+'</ul>';
+  if(D.future)h+='<h2 id="futuro">Próximamente</h2><div class="prod"><b>'+esc(D.future)+'</b>'+(D.futureWhy?'<span class="muted">'+esc(D.futureWhy)+'</span>':'')+'</div>';
+  h+='<h2 id="novedades">Novedades de la tienda</h2><ul class="list">'+each(D.vers,function(x){return '<li><b>'+x.v+'</b> '+esc(x.x)+'</li>';})+'</ul></div><footer>'+FOOT+'</footer>';
+  return {css:css,html:h};
+};
+
+RENDER.comunidad=function(D){var th=D.th,users=['@sofi','@leo','@dani','@mar','@ale'];
+  var css='body{background:'+th.bg+';color:'+th.fg+'}.shell{max-width:1040px;margin:0 auto;padding:20px;display:grid;grid-template-columns:190px 1fr 250px;gap:18px;align-items:start}@media(max-width:820px){.shell{grid-template-columns:1fr}}'+
+  '.card{background:'+th.card+';border-radius:16px;padding:16px}.logo{font-weight:800;font-size:20px;margin-bottom:10px}.nav a{display:block;padding:8px 10px;border-radius:8px;text-decoration:none;color:'+th.sub+'}.nav a.on{color:'+th.fg+';font-weight:700;background:'+th.bg+'}'+
+  '.pub{display:block;width:100%;background:'+th.accent+';color:'+th.btn+';border:0;border-radius:999px;padding:10px;font:inherit;font-weight:700;margin-top:10px}'+
+  '.post{background:'+th.card+';border-radius:16px;padding:16px;margin-bottom:14px}.who{display:flex;gap:10px;align-items:center;font-weight:700;margin-bottom:6px}.av{width:36px;height:36px;border-radius:50%;background:'+th.accent+';color:'+th.btn+';display:grid;place-items:center;flex:none}'+
+  '.act{color:'+th.sub+';font-size:14px;margin-top:8px}.tag{display:inline-block;margin:0 8px 6px 0;color:'+th.accent+';font-weight:700}.muted{color:'+th.sub+'}h2{font-size:17px;margin:0 0 10px}'+
+  '.rules{list-style:none;padding:0;margin:0;display:grid;gap:6px;font-size:14px}footer{padding:20px 24px 46px;text-align:center;color:'+th.sub+';font-size:14px}';
+  var h='<div class="shell" id="top"><aside class="card nav"><div class="logo">'+esc(D.emoji)+' '+esc(D.name)+'</div><a class="on" href="#top">Inicio</a><a href="#datos">Explorar</a><a href="#seguridad">Privacidad</a><a href="#novedades">Anuncios</a><button class="pub" type="button">'+esc(D.cta)+'</button></aside>';
+  h+='<main><div class="post"><div class="who"><span class="av">'+esc(D.emoji)+'</span>@'+esc(slug(D.name)||'equipo')+'</div>Hoy nace '+esc(D.name)+': '+esc(D.slogan)+'. '+esc(D.line)+'<div class="act">♥ 128 · 24 comentarios (de ejemplo)</div></div>';
+  h+=each(D.bens,function(b,i){return '<div class="post"><div class="who"><span class="av">'+users[i%users.length].charAt(1).toUpperCase()+'</span>'+users[i%users.length]+'</div>Lo que más me gusta de '+esc(D.name)+': '+esc(b)+'<div class="act">♥ '+(Math.floor(prand(i+40)*90)+5)+' (de ejemplo)</div></div>';});
+  if(D.finds.length)h+='<div id="hallazgos">'+each(D.finds,function(x){return '<div class="post"><div class="who"><span class="av">?</span>Hallazgo</div>'+esc(x)+'</div>';})+'</div>';
+  if(D.future)h+='<div class="post" id="futuro"><div class="who"><span class="av">!</span>Próximamente</div>'+esc(D.future)+(D.futureWhy?'. '+esc(D.futureWhy):'')+'</div>';
+  h+='<div id="novedades">'+each(D.vers,function(x){return '<div class="post"><div class="who"><span class="av">#</span>Anuncio '+x.v+'</div>'+esc(x.x)+'</div>';})+'</div></main>';
+  h+='<aside><div class="card" id="datos" style="margin-bottom:14px"><h2>Tendencias</h2>'+(D.data.length?each(D.data,function(d){return '<span class="tag">#'+esc((slug(d)||'tema').replace(/-/g,'').slice(0,20))+'</span>';}):'<span class="muted">Aquí aparecerán las tendencias.</span>')+'</div>';
+  h+='<div class="card" id="seguridad"><h2>Reglas de privacidad</h2>'+(D.host?'<p class="muted" style="margin:0 0 8px;font-size:14px">La comunidad vive '+esc(D.host)+'.</p>':'')+'<ul class="rules">'+(D.sec.length?each(D.sec,function(s){return '<li>✓ '+esc(s)+'</li>';}):'<li class="muted">Aún sin reglas.</li>')+'</ul></div></aside></div><footer>'+FOOT+'</footer>';
+  return {css:css,html:h};
+};
+
+RENDER.terminal=function(D){
+  var sl=slug(D.name)||'startup';
+  var css='body{background:#0A0E0B;color:#D7F5DE;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Courier New",monospace}.t{max-width:900px;margin:0 auto;padding:28px 22px 60px;font-size:15px;line-height:1.6}'+
+  '.p{color:#6EE7A0}.d{color:#8FAF99}.cmd{margin:22px 0 4px;color:#6EE7A0}.out{white-space:pre-wrap;margin:0;font:inherit}.ok{color:#6EE7A0}.big{font-size:clamp(22px,4vw,34px);font-weight:700;color:#FFFFFF;margin:0}'+
+  '.btn3{display:inline-block;border:1px solid #6EE7A0;color:#6EE7A0;padding:8px 16px;border-radius:6px;text-decoration:none;margin-top:12px}footer{color:#8FAF99;font-size:13px;margin-top:40px}';
+  function pad(s,n){s=String(s);while(s.length<n)s+=' ';return s;}
+  var h='<div class="t" id="top"><div class="cmd">$ npx '+esc(sl)+' --help</div><p class="big">'+esc(D.emoji)+' '+esc(D.name)+' <span class="d" style="font-size:16px">'+esc(D.ver)+'</span></p><pre class="out">'+esc(D.slogan)+'\n'+esc(D.line)+'</pre>';
+  h+='<div class="cmd">$ '+esc(sl)+' comandos</div><pre class="out">'+(D.bens.length?esc(D.bens.map(function(b){return pad('  '+sl+' '+cmdOf(b),34)+b;}).join('\n')):'  (aquí aparecerán tus comandos)')+'</pre>';
+  h+='<div class="cmd" id="datos">$ '+esc(sl)+' datos</div><pre class="out">'+(D.data.length?esc(D.data.map(function(d){return '  - '+d;}).join('\n')):'  (sin datos definidos)')+(D.dataWhy?'\n<span class="d">  # '+esc(D.dataWhy)+'</span>':'')+'</pre>';
+  h+='<div class="cmd" id="seguridad">$ '+esc(sl)+' status</div><pre class="out">'+(D.host?'  host ........ '+esc(D.host)+' <span class="ok">[OK]</span>\n':'  host ........ sin definir\n')+(D.sec.length?D.sec.map(function(s){return '  <span class="ok">[OK]</span> '+esc(s);}).join('\n'):'  (sin medidas de seguridad)')+'</pre>';
+  if(D.finds.length)h+='<div class="cmd" id="hallazgos">$ '+esc(sl)+' hallazgos</div><pre class="out">'+esc(D.finds.map(function(x){return '  - '+x;}).join('\n'))+'</pre>';
+  if(D.future)h+='<div class="cmd" id="futuro">$ '+esc(sl)+' roadmap</div><pre class="out">  -&gt; '+esc(D.future)+(D.futureWhy?'\n<span class="d">  # '+esc(D.futureWhy)+'</span>':'')+'</pre>';
+  h+='<div class="cmd" id="novedades">$ cat CHANGELOG.md</div><pre class="out">'+D.vers.map(function(x){return esc(x.v+'  '+x.x);}).join('\n')+'</pre>';
+  h+='<div class="cmd">$ npm install -g '+esc(sl)+'</div><a class="btn3" href="#top">[ '+esc(D.cta)+' ]</a><footer>'+FOOT+'</footer></div>';
+  return {css:css,html:h};
+};
+
+function buildDoc(){
+  var th=THEMES[S.style]||THEMES.moderno;
+  var name=t(S.name)||'Tu startup',slogan=t(S.slogan)||'Tu slogan va aquí';
+  var D={th:th,name:name,slogan:slogan,line:ideaLine(),cta:t(S.cta)||'Probar ahora',emoji:S.emoji,bens:benefits(),data:S.data,dataWhy:t(S.dataWhy),host:S.host,sec:S.sec.concat(protList()),finds:findsList(),future:S.future,futureWhy:t(S.futureWhy),vers:versionList(name),ver:lastVersion()};
+  var L=RENDER[layoutOf()](D);
+  var base='*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;line-height:1.5}a{color:inherit}';
+  return '<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>'+esc(name)+'</title><style>'+base+L.css+'</style></head><body>'+L.html+'</body></html>';
+}
+
+/* Prompts y guion */
+function v(x,fallback){return t(x)||fallback||'(pendiente)';}
+function eventsText(){
+  var arr=S.events.filter(function(e){return t(e.d);}).map(function(e){var ev=evByCode(e.c);return '- Ante «'+(ev?ev.title:e.c)+'» ('+(ev?twistOf(ev):'')+') decidimos: '+t(e.d);});
+  return arr.length?arr.join('\n'):'- (sin eventos todavía)';
+}
+function promptVideo(){
+  var th=THEMES[S.style]||THEMES.moderno,b=benefits();
+  return 'Genera un video de 8 segundos, en formato horizontal 16:9, que simule el uso de la app o plataforma "'+v(S.name,'mi startup')+'".\n'+
+  'Idea: '+ideaLine()+'\nPresenta el producto como '+LAYOUTS[layoutOf()].video+'.\n\n'+
+  'Escenas:\n'+
+  '1) Pantalla de inicio con el nombre "'+v(S.name,'mi startup')+'" y el slogan "'+v(S.slogan,'mi slogan')+'".\n'+
+  '2) Se muestran, una por una, estas funciones: '+(b.length?b.join('; '):'(pendiente)')+'.\n'+
+  '3) Un momento que transmita seguridad: '+(S.sec.length?S.sec[0]:'datos protegidos')+'.\n'+
+  '4) Cierre con una pantalla que dice "Próximamente: '+v(S.future,'nuevas funciones')+'".\n\n'+
+  'Estilo visual: '+th.desc+'. Interfaz de app limpia, textos en español y legibles, sin personas reales identificables y sin logotipos de marcas existentes.';
+}
+function promptImg(){
+  var th=THEMES[S.style]||THEMES.moderno,b=benefits();
+  return 'Genera 3 imágenes horizontales 16:9 con pantallas del producto "'+v(S.name,'mi startup')+'" ('+ideaLine()+'), presentado como '+LAYOUTS[layoutOf()].video+'.\n'+
+  '1) Pantalla de inicio con el nombre y el slogan "'+v(S.slogan,'mi slogan')+'".\n'+
+  '2) Pantalla de la función principal, mostrando: '+(b.length?b.join('; '):'(pendiente)')+'.\n'+
+  '3) Pantalla "Próximamente: '+v(S.future,'nuevas funciones')+'".\n'+
+  'Estilo visual: '+th.desc+'. Textos en español, sin personas reales identificables y sin logotipos de marcas existentes.';
+}
+function promptTexts(){
+  var th=THEMES[S.style]||THEMES.moderno,b=benefits();
+  return 'Actúa como diseñador de producto y copywriter. Ayúdame a mejorar los textos de la landing de la startup de mi equipo. Responde en español, con lenguaje claro y juvenil.\n\n'+
+  'Nuestra startup\n'+
+  '- Problema: '+v(S.problem)+'\n- Para quién: '+v(S.who)+'\n- Qué logra: '+v(S.what)+'\n- Cómo lo hace: '+v(S.how)+'\n'+
+  '- Nombre actual: '+v(S.name)+'\n- Slogan actual: '+v(S.slogan)+'\n- Beneficios: '+(b.length?b.join('; '):'(pendiente)')+'\n- Estilo: '+th.label+'\n\n'+
+  'Ajustes por eventos del mercado\n'+eventsText()+'\n\n'+
+  'Entrégame: 1) tres opciones de nombre, 2) tres slogans de máximo 8 palabras, 3) una descripción de 2 líneas, 4) tres beneficios con título corto y una frase, 5) el texto para el botón principal.';
+}
+function pitchScript(){
+  var b=benefits(),p=[];
+  p.push('Hola, somos '+v(S.team,'nuestro equipo')+'. Detectamos un problema: '+v(S.problem,'(cuenten el problema)')+'.');
+  p.push('Por eso creamos '+v(S.name,'(nombre)')+': '+v(S.slogan,'(slogan)')+'. '+ideaLine());
+  if(b.length)p.push('Lo que ofrecemos: '+b.join(', ')+'.');
+  if(S.data.length)p.push('Para mejorar, medimos '+S.data.join(', ').toLowerCase()+'.'+(t(S.dataWhy)?' Los usamos para: '+t(S.dataWhy):''));
+  if(S.host||S.sec.length)p.push('Nuestro producto vive '+(S.host||'(dónde vive)')+' y lo protegemos con '+(S.sec.length?S.sec.join(', ').toLowerCase():'(medidas de seguridad)')+'.');
+  S.events.filter(function(e){return t(e.d);}).forEach(function(e){var ev=evByCode(e.c);p.push('Cuando ocurrió «'+(ev?ev.title:e.c)+'», nuestra decisión fue: '+t(e.d));});
+  if(S.deploy.ok){var cz=chaosFor();p.push('En el deploy nos pasó algo: «'+cz.title+'». Lo resolvimos así: '+cz.fixLabel.toLowerCase()+'.');}
+  if(S.future)p.push('Lo que sigue: '+S.future.toLowerCase()+'.'+(t(S.futureWhy)?' Elegimos esto porque: '+t(S.futureWhy):''));
+  var fs=findsList(),ps=protList(),pa=pitchArgs();
+  if(fs.length)p.push('Con nuestros datos descubrimos esto: '+fs.join(' '));
+  if(ps.length)p.push('Además cuidamos a las personas: '+ps.join(' '));
+  pa.forEach(function(x){p.push(x);});
+  p.push(v(S.name,'(nombre)')+': '+v(S.slogan,'(slogan)')+'. Gracias.');
+  return p.join('\n\n');
+}
+function words(s){var m=t(s).match(/\S+/g);return m?m.length:0;}
+function fillOutputs(){
+  $('oVideo').value=promptVideo();$('oImg').value=promptImg();$('oTexts').value=promptTexts();
+  $('oPitch').value=pitchScript();$('oPost').value=postmortem();$('oReadme').value=readme();updateCount();
+}
+function updateCount(){
+  $('pitchCount').textContent=words($('oPitch').value)+' palabras. Para 60 segundos conviene estar entre 120 y 150.';
+}
+
+/* Terminal */
+function term(id,lines){$(id).innerHTML=lines.map(function(l){return '<span class="'+(l.c||'')+'">'+esc(l.t)+'</span>';}).join('\n');}
+
+/* Reto de datos: consultas SQL guiadas (también se usan en los eventos) */
+var USERS=[
+ {nombre:'Ana',ciudad:'Querétaro',plan:'premium',edad:17},
+ {nombre:'Luis',ciudad:'Monterrey',plan:'gratis',edad:18},
+ {nombre:'Sofía',ciudad:'Querétaro',plan:'gratis',edad:16},
+ {nombre:'Diego',ciudad:'Monterrey',plan:'premium',edad:17},
+ {nombre:'Valeria',ciudad:'Querétaro',plan:'premium',edad:18},
+ {nombre:'Mateo',ciudad:'Monterrey',plan:'gratis',edad:16}
+];
+var COLS=['nombre','ciudad','plan','edad'];
+var SQLV=[{sel:['nombre','plan'],f:'ciudad',v:'Querétaro'},{sel:['nombre','edad'],f:'ciudad',v:'Monterrey'},{sel:['nombre','ciudad'],f:'plan',v:'premium'}];
+function sqlVar(){return SQLV[(S.num-1)%3];}
+function pn(s){return String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();}
+function sqlTaskText(){
+  var V=sqlVar(),w=V.f==='ciudad'?'viven en '+V.v:'tienen el plan '+V.v;
+  return '«Muéstrame '+V.sel.join(' y ')+' de las personas que '+w+'.»';
+}
+function sqlSpecRound(){var V=sqlVar();return {table:'usuarios',cols:COLS,rows:USERS,sel:V.sel,f:V.f,v:V.v,task:sqlTaskText(),key:keyFor(S.num,2),keyLabel:'CLAVE DE LA RONDA 2',to:'Producto'};}
+function termEl(el,lines){el.innerHTML=lines.map(function(l){return '<span class="'+(l.c||'')+'">'+esc(l.t)+'</span>';}).join('\n');}
+
+function execSql(spec,raw){
+  var cols0=spec.cols,tbl=spec.table;
+  function bad(m){return {ok:false,lines:[{t:m,c:'err'},{t:quip('sql'),c:'dim'}]};}
+  function soft(a,b){return {ok:false,lines:[{t:a,c:'err'},{t:b,c:'dim'}]};}
+  var q=String(raw||'').trim();
+  if(!q)return bad('error: escribe una consulta primero.');
+  var semi=/;\s*$/.test(q);
+  q=q.replace(/;\s*$/,'').replace(/\s+/g,' ').trim();
+  var m,i;
+  if(!/^select\b/i.test(q))return bad('error línea 1: la consulta debe empezar con SELECT.');
+  m=q.match(/^select\s+(.*?)\s+from\b\s*(.*)$/i);
+  if(!m)return bad('error línea 1: falta FROM para decir de qué tabla leer.');
+  var colsRaw=m[1],rest=m[2];
+  if(!colsRaw)return bad('error línea 1: falta decir qué columnas quieres.');
+  var cols=colsRaw.split(',').map(function(c){return c.trim();});
+  for(i=0;i<cols.length;i++){
+    if(/\s/.test(cols[i]))return bad('error línea 1: separa las columnas con comas.');
+    if(cols[i]!=='*'&&cols0.indexOf(pn(cols[i]))===-1)return bad("error línea 1: la columna '"+cols[i]+"' no existe. Columnas: "+cols0.join(', ')+'.');
+  }
+  if(!rest)return bad('error línea 1: falta el nombre de la tabla después de FROM.');
+  m=rest.match(/^(\w+)\s*(.*)$/);
+  if(!m||pn(m[1])!==tbl)return bad("error línea 1: la tabla '"+(m?m[1]:rest)+"' no existe. La tabla se llama "+tbl+'.');
+  var after=m[2];
+  if(!after)return bad('error línea 1: falta WHERE. El jefe pidió solo algunas filas, no todas.');
+  if(!/^where\b/i.test(after))return bad('error línea 1: no entiendo «'+after.split(' ')[0]+'». ¿Quisiste escribir WHERE?');
+  var cond=after.replace(/^where\s*/i,'');
+  m=cond.match(/^(\w+)\s*=\s*(.+)$/);
+  if(!m)return bad('error línea 1: la condición se escribe campo = valor.');
+  var field=pn(m[1]),val=m[2].trim();
+  if(cols0.indexOf(field)===-1)return bad("error línea 1: la columna '"+m[1]+"' no existe. Columnas: "+cols0.join(', ')+'.');
+  var quoted=/^(['"]).*\1$/.test(val);
+  if(quoted){val=val.slice(1,-1);}
+  else if(!/^\d+$/.test(val))return bad("error línea 1: los textos van entre comillas, por ejemplo 'texto'.");
+  var wantSet=spec.sel.slice().sort().join(','),gotSet=cols.map(pn).sort().join(',');
+  if(gotSet!==wantSet)return soft('La consulta corre, pero devuelve columnas distintas a las que pidió el jefe.','Relee lo que pidió y revisa qué columnas incluir.');
+  if(field!==spec.f||pn(val)!==pn(spec.v))return soft('La consulta corre, pero no filtra las filas que pidió el jefe.','Revisa la columna y el valor de WHERE.');
+  var rows=spec.rows.filter(function(u){return pn(u[field])===pn(val);});
+  var cf=cols.map(pn);
+  var lines=[{t:'Consulta correcta. '+rows.length+' filas.',c:'ok'},{t:cf.join('  |  '),c:'dim'}];
+  rows.forEach(function(r){lines.push({t:cf.map(function(c){return String(r[c]);}).join('  |  ')});});
+  if(!semi)lines.push({t:'Nota: terminaste sin ;. En muchos sistemas es obligatorio.',c:'dim'});
+  lines.push({t:'Funcionó. Disfruta el momento: no siempre pasa a la primera.',c:'dim'});
+  return {ok:true,lines:lines};
+}
+
+function sqlSolution(spec){return 'SELECT '+spec.sel.join(', ')+' FROM '+spec.table+" WHERE "+spec.f+" = '"+spec.v+"';";}
+
+function sqlWidget(host,spec,st,onDone){
+  if(!st.cols)st.cols=[];
+  if(st.f==null)st.f='';
+  if(st.v==null)st.v='';
+  if(!st.mode)st.mode='guiado';
+  if(!st.hints)st.hints=0;
+  if(st.text==null)st.text='';
+  var tbl='<div class="tblwrap"><table class="dt"><tr>'+spec.cols.map(function(c){return '<th>'+esc(c)+'</th>';}).join('')+'</tr>'+
+    spec.rows.map(function(r){return '<tr>'+spec.cols.map(function(c){return '<td>'+esc(r[c])+'</td>';}).join('')+'</tr>';}).join('')+'</table></div>';
+  host.innerHTML=
+   '<div class="hint"><b>SQL en 30 segundos.</b> Una consulta es una frase con tres partes: <code>SELECT</code> dice qué columnas quieres ver, <code>FROM</code> dice de qué tabla, y <code>WHERE</code> es el filtro: solo las filas que cumplen la condición.<br>Ejemplo con otra tabla: <code>SELECT nombre, edad FROM mascotas WHERE tipo = \'perro\';</code> significa «muéstrame el nombre y la edad de las mascotas que son perros».</div>'+
+   '<div class="hint"><b>Lo que pide el jefe:</b> '+esc(spec.task)+'</div>'+
+   '<p class="lead" style="margin-bottom:6px">Así se ve la tabla <b>'+esc(spec.table)+'</b>. Cada columna es un dato y cada fila es un registro:</p>'+tbl+
+   '<div id="sqG"><div class="sqlb">'+
+     '<p><code>SELECT</code>: ¿qué columnas quiere <b>ver</b> el jefe? Marca solo esas.</p>'+
+     '<div class="chips2" id="sqCols">'+spec.cols.map(function(c){return '<label><input type="checkbox" value="'+esc(c)+'"'+(st.cols.indexOf(c)!==-1?' checked':'')+'> '+esc(c)+'</label>';}).join('')+'</div>'+
+     '<p><code>FROM</code>: la tabla ya está elegida: <b>'+esc(spec.table)+'</b>.</p>'+
+     '<p><code>WHERE</code>: ¿a cuáles filas se refiere? Elige la columna y el valor.</p>'+
+     '<div class="wherow"><select id="sqF" aria-label="Columna del filtro"><option value="">columna</option>'+spec.cols.map(function(c){return '<option value="'+esc(c)+'"'+(st.f===c?' selected':'')+'>'+esc(c)+'</option>';}).join('')+'</select><span>=</span><select id="sqV" aria-label="Valor del filtro"></select></div>'+
+   '</div><p class="lead" style="margin-bottom:6px">Tu consulta hasta ahora:</p><pre class="term" id="sqPrev"></pre></div>'+
+   '<div id="sqFree" hidden><label class="field"><span>Escribe la consulta</span><textarea id="sqT" class="code" rows="4" spellcheck="false" autocomplete="off" placeholder="SELECT ... FROM ... WHERE ...;"></textarea><small>Los textos van entre comillas y las columnas se separan con comas.</small></label></div>'+
+   '<div class="bar2" style="margin-top:0"><button id="sqRun" class="btn primary" type="button">Ejecutar consulta</button><button id="sqHint" class="btn" type="button">Pista</button><button id="sqMode" class="btn" type="button"></button></div>'+
+   '<pre id="sqOut" class="term" aria-live="polite" style="margin-top:14px"></pre>';
+  var $q=function(s){return host.querySelector(s);};
+  var outEl=$q('#sqOut'),prev=$q('#sqPrev'),selF=$q('#sqF'),selV=$q('#sqV'),ta=$q('#sqT'),modeBtn=$q('#sqMode');
+  function buildSql(){return 'SELECT '+(st.cols.length?st.cols.join(', '):'___')+' FROM '+spec.table+' WHERE '+(st.f||'___')+' = '+(st.v?"'"+st.v+"'":'___')+';';}
+  function fillVals(){
+    var vals=[];
+    if(st.f){spec.rows.forEach(function(r){var x=String(r[st.f]);if(vals.indexOf(x)===-1)vals.push(x);});}
+    if(vals.indexOf(st.v)===-1)st.v='';
+    selV.innerHTML='<option value="">valor</option>'+vals.map(function(x){return '<option value="'+esc(x)+'"'+(st.v===x?' selected':'')+'>'+esc(x)+'</option>';}).join('');
+  }
+  function mode(){
+    var g=st.mode==='guiado';
+    $q('#sqG').hidden=!g;$q('#sqFree').hidden=g;
+    modeBtn.textContent=g?'Escribir yo la consulta (si ya sabes SQL)':'Volver a la versión guiada';
+    ta.value=st.text;
+  }
+  function showSolved(){
+    termEl(outEl,[{t:'Ya resolviste este reto.',c:'ok'},{t:spec.keyLabel+': '+spec.key,c:'ok'},{t:'Díctasela a '+spec.to+'.',c:'dim'}]);
+  }
+  fillVals();prev.textContent=buildSql();mode();
+  if(st.solved)showSolved();else termEl(outEl,[{t:'Aquí aparecerá el resultado.',c:'dim'}]);
+  Array.prototype.forEach.call(host.querySelectorAll('#sqCols input'),function(inp){
+    inp.addEventListener('change',function(){
+      st.cols=spec.cols.filter(function(c){return host.querySelector('#sqCols input[value="'+c+'"]').checked;});
+      prev.textContent=buildSql();save();
+    });
+  });
+  selF.addEventListener('change',function(){st.f=selF.value;st.v='';fillVals();prev.textContent=buildSql();save();});
+  selV.addEventListener('change',function(){st.v=selV.value;prev.textContent=buildSql();save();});
+  ta.addEventListener('input',function(){st.text=ta.value;save();});
+  modeBtn.onclick=function(){st.mode=st.mode==='guiado'?'libre':'guiado';save();mode();};
+  $q('#sqHint').onclick=function(){
+    st.hints=Math.min(3,st.hints+1);save();
+    var tips=[
+      'Pista 1: marca solo lo que el jefe quiere VER (lo que viene después de «muéstrame»).',
+      'Pista 2: el filtro sale del final de la frase. La columna es «'+spec.f+'» y el valor es «'+spec.v+'».',
+      'Pista 3: la consulta completa queda así: '+sqlSolution(spec)
+    ];
+    termEl(outEl,tips.slice(0,st.hints).map(function(x){return {t:x,c:'dim'};}));
+  };
+  $q('#sqRun').onclick=function(){
+    var text;
+    if(st.mode==='guiado'){
+      if(!st.cols.length){termEl(outEl,[{t:'Falta elegir al menos una columna en SELECT.',c:'err'}]);return;}
+      if(!st.f||!st.v){termEl(outEl,[{t:'Falta elegir la columna y el valor del filtro en WHERE.',c:'err'}]);return;}
+      text=buildSql();
+    }else{text=ta.value;}
+    var r=execSql(spec,text);
+    if(r.ok){
+      r.lines.push({t:spec.keyLabel+': '+spec.key,c:'ok'});
+      r.lines.push({t:'Díctasela a '+spec.to+'.',c:'dim'});
+      st.solved=true;save();termEl(outEl,r.lines);
+      if(onDone)onDone();
+    }else{termEl(outEl,r.lines);}
+  };
+}
+function renderSqlPanel(){
+  if(!S.sqlW)S.sqlW={};
+  if(S.solved.datos)S.sqlW.solved=true;
+  sqlWidget($('sqlHost'),sqlSpecRound(),S.sqlW,function(){S.solved.datos=true;save();renderNav();});
+}
+
+/* Reto de seguridad: cifrado César */
+function shiftText(s,k){return s.replace(/[A-Z]/g,function(c){return String.fromCharCode((((c.charCodeAt(0)-65+k)%26)+26)%26+65);});}
+function cipherPlain(){return 'LA CLAVE DE LA RONDA 3 ES '+keyFor(S.num,3);}
+function cipherShift(){return ((S.num*5)%23)+2;}
+function alphaBlock(cap,str){var a=str.split('').join(' ');return cap+'\n'+a.slice(0,25)+'\n'+a.slice(26);}
+function renderCipher(){
+  var cipher=shiftText(cipherPlain(),cipherShift()),s=S.shift,alpha='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  $('cipherText').textContent=cipher;
+  $('shiftVal').textContent=String(s);
+  $('alphaTop').textContent=alphaBlock('Cifrado (lo que ves):',alpha);
+  $('alphaBot').textContent=alphaBlock('Descifrado (lo que significa):',shiftText(alpha,-s));
+  var plain=shiftText(cipher,-s);
+  $('plainText').textContent=plain;
+  if(s===cipherShift()){
+    S.solved.seg=true;save();renderNav();
+    term('segOut',[{t:'Mensaje descifrado.',c:'ok'},{t:'CLAVE DE LA RONDA 3: '+keyFor(S.num,3),c:'ok'},{t:'Díctasela a quien maneja la landing.',c:'dim'}]);
+  }else if(S.solved.seg){
+    term('segOut',[{t:'Ya lo descifraste antes. CLAVE DE LA RONDA 3: '+keyFor(S.num,3),c:'ok'}]);
+  }else{
+    term('segOut',[{t:'Todavía no se lee. '+quip('seg'),c:'dim'}]);
+  }
+}
+$('whMinus').onclick=function(){S.shift=(S.shift+25)%26;save();renderCipher();};
+$('whPlus').onclick=function(){S.shift=(S.shift+1)%26;save();renderCipher();};
+
+/* Reto del futuro: ordenar pseudocódigo */
+function pzLines(){
+  var N=[500,800,1000][(S.num-1)%3],M=N+50+((S.num*37)%400);
+  return ['INICIO','usuarios = '+M,'SI usuarios > '+N+' ENTONCES','    mostrar "'+keyFor(S.num,4)+'"','SINO','    mostrar "sigue creciendo"','FIN SI','FIN'];
+}
+function seededOrder(seed){
+  var a=[0,1,2,3,4,5,6,7],s=(seed*2654435761)>>>0,i,j,tmp,tries=0;
+  function rnd(){s=(s*1664525+1013904223)>>>0;return s/4294967296;}
+  do{
+    for(i=a.length-1;i>0;i--){j=Math.floor(rnd()*(i+1));tmp=a[i];a[i]=a[j];a[j]=tmp;}
+    tries++;
+  }while(a.every(function(x,k){return x===k;})&&tries<10);
+  return a;
+}
+function renderPz(){
+  if(!S.pz||S.pz.length!==8)S.pz=seededOrder(S.num+7);
+  var L=pzLines(),ol=$('pzList');ol.innerHTML='';
+  S.pz.forEach(function(idx,pos){
+    var li=document.createElement('li');
+    var sp=document.createElement('span');sp.textContent=L[idx];
+    var up=document.createElement('button');up.type='button';up.textContent='▲';up.setAttribute('aria-label','Subir la línea '+(pos+1));up.disabled=pos===0;
+    var dn=document.createElement('button');dn.type='button';dn.textContent='▼';dn.setAttribute('aria-label','Bajar la línea '+(pos+1));dn.disabled=pos===S.pz.length-1;
+    up.onclick=function(){var x=S.pz[pos];S.pz[pos]=S.pz[pos-1];S.pz[pos-1]=x;save();renderPz();};
+    dn.onclick=function(){var x=S.pz[pos];S.pz[pos]=S.pz[pos+1];S.pz[pos+1]=x;save();renderPz();};
+    li.appendChild(sp);li.appendChild(up);li.appendChild(dn);ol.appendChild(li);
+  });
+  if(S.solved.pitch){term('pzOut',[{t:'Programa correcto.',c:'ok'},{t:'CLAVE DE LA RONDA 4: '+keyFor(S.num,4),c:'ok'},{t:'Díctasela a quien maneja la landing.',c:'dim'}]);}
+  else{term('pzOut',[{t:'Aquí aparecerá el resultado del programa.',c:'dim'}]);}
+}
+$('pzRun').onclick=function(){
+  var L=pzLines(),ok=S.pz.every(function(x,k){return x===k;});
+  if(ok){
+    var N=L[2].replace('SI usuarios > ','').replace(' ENTONCES',''),M=L[1].replace('usuarios = ','');
+    term('pzOut',[{t:'> ejecutando programa...',c:'dim'},{t:'usuarios = '+M},{t:M+' > '+N+' es verdadero'},{t:'CLAVE DE LA RONDA 4: '+keyFor(S.num,4),c:'ok'},{t:'Díctasela a quien maneja la landing.',c:'dim'}]);
+    S.solved.pitch=true;save();renderNav();return;
+  }
+  var msg,first=-1,k;
+  for(k=0;k<S.pz.length;k++){if(S.pz[k]!==k){first=k;break;}}
+  if(S.pz[0]!==0){msg='error línea 1: todo programa empieza con INICIO.';}
+  else if(S.pz.indexOf(6)<S.pz.indexOf(2)){msg='error: aparece FIN SI antes de abrir el SI.';}
+  else if(S.pz.indexOf(1)>S.pz.indexOf(2)){msg='error: se usa "usuarios" antes de darle un valor.';}
+  else{msg='error de sintaxis en la línea '+(first+1)+'. Revisa que cada SI tenga su SINO y su FIN SI, y que el programa termine con FIN.';}
+  term('pzOut',[{t:msg,c:'err'},{t:quip('pz'),c:'dim'}]);
+};
+
+/* Ensayo de pitch */
+var rLeft=60,rT=null;
+function fmt(s){s=Math.max(0,s);var m=Math.floor(s/60),x=s%60;return (m<10?'0':'')+m+':'+(x<10?'0':'')+x;}
+function renderR(){$('rClock').textContent=fmt(rLeft);$('rClock').classList.toggle('low',rLeft<=10);}
+$('rStart').onclick=function(){
+  if(rT){clearInterval(rT);rT=null;$('rStart').textContent='Continuar';return;}
+  if(rLeft<=0)rLeft=60;
+  $('rStart').textContent='Pausar';
+  rT=setInterval(function(){rLeft--;if(rLeft<=0){rLeft=0;clearInterval(rT);rT=null;$('rStart').textContent='Iniciar';}renderR();},1000);
+};
+$('rReset').onclick=function(){if(rT){clearInterval(rT);rT=null;}rLeft=60;$('rStart').textContent='Iniciar';renderR();};
+
+/* Humor: mensajes cuando algo sale mal */
+var QUIPS={
+ sql:['Un punto y coma olvidado ha hundido imperios.','El compilador no está enojado, solo decepcionado.','Tranquilo: hasta quienes programan profesionalmente copian el error y lo buscan en internet.','Dato real: el 90% de programar es leer mensajes de error. Vas bien.','Ctrl+Z no arregla la vida, pero en el código sí ayuda.'],
+ pz:['Este programa tiene más drama que una telenovela.','Los programas son como los sándwiches: el orden importa.','El código no perdona, pero tú puedes intentarlo otra vez.'],
+ seg:['Eso se lee como idioma alienígena. Sigue girando.','Parece la contraseña de tu tío. Sigue girando.','Los espías llevan horas en esto. Tú vas más rápido.'],
+ lock:['Acceso denegado. Intenta decirla más despacio y con cariño.','Esa clave la inventaste tú, ¿verdad?','La puerta sigue cerrada. Pídele a tu compañero que no la susurre.']
+};
+function quip(k){var a=QUIPS[k];return a[Math.floor(Math.random()*a.length)];}
+
+/* Deploy: pipeline con errores reales (y uno cómico por equipo) */
+var CHAOS=[
+ {title:'Puerto 80 ocupado',lines:['deploy: iniciando servidor en el puerto 80...','error: EADDRINUSE. El puerto 80 ya está ocupado.','pista: lo ocupa un proceso llamado "servidor_prueba_final_v3". Nadie sabe quién lo dejó prendido.'],fixLabel:'Matar el proceso fantasma',fix:['kill -9 servidor_prueba_final_v3','proceso eliminado. Nadie lo va a extrañar.'],root:'Un servidor de pruebas anterior se quedó corriendo y ocupó el puerto.',prevent:'Cerrar los procesos al terminar y usar puertos distintos para las pruebas.'},
+ {title:'Deploy en viernes por la tarde',lines:['deploy: revisando el calendario...','error: es viernes, 4:59 pm. La política del equipo prohíbe publicar en viernes.','pista: la última persona que rompió esta regla trabajó el sábado.'],fixLabel:'Esperar hasta el lunes',fix:['sleep 3 días (acelerado)...','es lunes, 9:00 am. Café servido. Ya se puede publicar.'],root:'Intentamos publicar un viernes por la tarde.',prevent:'No publicar cambios importantes antes del fin de semana.'},
+ {title:'Contraseña subida al repositorio',lines:['audit: escaneando el repositorio...','error: encontramos una contraseña escrita en un archivo público.','pista: el archivo se llama "contraseñas_NO_ABRIR.txt". Spoiler: todos lo abrieron.'],fixLabel:'Rotar las credenciales',fix:['generando contraseñas nuevas...','contraseñas viejas revocadas. El archivo ahora vive en .gitignore.'],root:'Una contraseña quedó guardada dentro del repositorio.',prevent:'Usar variables de entorno y un archivo .gitignore desde el primer commit.'},
+ {title:'Certificado SSL vencido',lines:['deploy: probando la conexión segura...','error: el certificado SSL venció ayer a las 11:59 pm. El candado del navegador está rojo.','pista: nadie puso el recordatorio de renovarlo. Nadie.'],fixLabel:'Renovar el certificado',fix:['solicitando certificado nuevo...','certificado válido por 90 días. Ya pueden poner el recordatorio.'],root:'El certificado de seguridad venció sin que nadie lo notara.',prevent:'Activar la renovación automática y alertas 30 días antes.'},
+ {title:'El DNS todavía no propaga',lines:['deploy: verificando el dominio...','error: el dominio todavía apunta a la página de otra persona.','pista: el DNS tarda en propagarse. Todo el mundo le da F5 como si ayudara.'],fixLabel:'Esperar y refrescar (como todo el mundo)',fix:['esperando propagación (acelerada)...','F5... F5... F5... ya apunta a su servidor.'],root:'El cambio de DNS todavía no se había propagado.',prevent:'Cambiar el DNS con anticipación y planear tiempo de espera.'},
+ {title:'En mi máquina sí funciona',lines:['deploy: iniciando la app en el servidor...','error: Cannot find module "version-de-dani". En el servidor no existe.','pista: en la compu de Dani sí funciona. Siempre funciona en la compu de Dani.'],fixLabel:'Empaquetar todo en un contenedor',fix:['docker build -t startup .','la ballena está lista: ahora funciona igual en todas partes.'],root:'La app dependía de algo instalado solo en una computadora.',prevent:'Empaquetar el proyecto en contenedores y documentar las dependencias.'},
+ {title:'Base de datos con nombre improvisado',lines:['deploy: conectando a la base de datos...','error: no existe la base "produccion". Existe "prueba_final_v2_NUEVO_ahora_si".','pista: ya hay datos reales guardados ahí. Respira.'],fixLabel:'Renombrar la base de datos',fix:['ALTER DATABASE prueba_final_v2_NUEVO_ahora_si RENAME TO produccion;','listo. Por fin tiene un nombre digno.'],root:'La base de datos de producción tenía un nombre improvisado.',prevent:'Definir una convención de nombres desde el inicio.'},
+ {title:'Servidor sin espacio',lines:['deploy: copiando archivos...','error: no queda espacio en el disco (100%).','pista: 40 GB son capturas de pantalla llamadas "Captura (143).png".'],fixLabel:'Limpiar el disco',fix:['rm -rf capturas_viejas/','liberados 40 GB. Se aceptan nuevas capturas con moderación.'],root:'El servidor se llenó de archivos innecesarios.',prevent:'Monitorear el espacio en disco y limpiar archivos temporales.'},
+ {title:'Se publicó la rama equivocada',lines:['deploy: publicando la rama actual...','advertencia: la rama se llama "pruebas-dani-NO-TOCAR".','error: el botón principal de producción dice "Lorem ipsum".'],fixLabel:'Cambiar a la rama principal',fix:['git checkout main','ahora sí: la rama correcta. El Lorem ipsum se queda en pruebas.'],root:'Se publicó una rama de pruebas por error.',prevent:'Proteger la rama principal y publicar solo desde ella.'}
+];
+function chaosFor(){return CHAOS[(S.num-1)%CHAOS.length];}
+var STAGES=[
+ {k:'install',txt:'instalando dependencias (npm install)',ok:'added 1337 paquetes. 1336 los instaló alguien más.'},
+ {k:'lint',txt:'revisando el estilo del código (lint)',ok:'lint: sin errores (milagro)'},
+ {k:'test',txt:'corriendo pruebas',ok:'pruebas: todo en verde'},
+ {k:'audit',txt:'auditando seguridad',ok:'auditoría: sin vulnerabilidades críticas'},
+ {k:'build',txt:'construyendo el proyecto (build)',ok:'build: listo en 0.8 s'},
+ {k:'deploy',txt:'publicando en producción',ok:''}
+];
+function deployChecks(){
+  var f=[],nw=words(S.slogan),nb=benefits().length,hasLoc=S.data.indexOf('Dónde se encuentran (ubicación)')!==-1,hasConsent=S.sec.indexOf('Aviso de privacidad y consentimiento')!==-1;
+  if(!t(S.name))f.push({st:'lint',m:'error: "name" is undefined. ¿Les dio pena ponerle nombre a su startup?',go:'producto',gl:'Ir a Producto'});
+  if(!t(S.slogan))f.push({st:'test',m:'FAIL slogan.test: el slogan está vacío. Una startup sin slogan es solo un grupo de WhatsApp.',go:'producto',gl:'Ir a Producto'});
+  else if(nw>8)f.push({st:'test',m:'FAIL slogan.test: el slogan tiene '+nw+' palabras (máximo 8). Nadie lee un slogan así de largo.',go:'producto',gl:'Ir a Producto'});
+  if(nb<3)f.push({st:'test',m:'FAIL beneficios.test: se esperaban 3 beneficios y hay '+nb+'.',go:'producto',gl:'Ir a Producto'});
+  if(!S.sec.length)f.push({st:'audit',m:'AUDITORÍA CRÍTICA: 0 medidas de seguridad. Su app es una casa sin puertas.',go:'infra',gl:'Ir a Infra y seguridad'});
+  if(hasLoc&&!hasConsent)f.push({st:'audit',m:'AUDITORÍA ALTA: recogen la ubicación de las personas sin aviso de privacidad. Legislación Informática les manda saludos.',go:'infra',gl:'Ir a Infra y seguridad'});
+  S.events.forEach(function(e){if(!t(e.d)){var ev=evByCode(e.c);f.push({st:'audit',warn:true,m:'advertencia: el evento «'+(ev?ev.title:e.c)+'» no tiene decisión documentada.',go:'eventos',gl:'Ir a Eventos'});}});
+  if(!S.host)f.push({st:'build',m:'error: no definieron dónde vive el producto (¿en la nube, en un servidor o en la compu de un primo?).',go:'infra',gl:'Ir a Infra y seguridad'});
+  return f;
+}
+var dpBusy=false,dpTimer=null;
+function dpAppend(l){var s=document.createElement('span');s.className=l.c||'';s.textContent=l.t+'\n';$('dpOut').appendChild(s);$('dpOut').scrollTop=$('dpOut').scrollHeight;}
+function dpPrint(lines,done){
+  var i=0,reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  dpBusy=true;
+  (function next(){
+    if(i>=lines.length){dpBusy=false;if(done)done();return;}
+    var l=lines[i++];dpAppend(l);
+    dpTimer=setTimeout(next,reduce?0:(l.d||240));
+  })();
+}
+function dpActions(items){
+  var box=$('dpActions');box.innerHTML='';
+  if(!items||!items.length){box.hidden=true;return;}
+  box.hidden=false;
+  items.forEach(function(it){var b=document.createElement('button');b.type='button';b.className='btn'+(it.primary?' primary':'');b.textContent=it.label;b.onclick=it.fn;box.appendChild(b);});
+}
+function renderScore(){
+  var e=S.deploy.errors,r=e===0?(S.deploy.tries?'Sospechosamente perfecto.':'Todavía sin intentos.'):(e<=2?'Humanidad normal.':(e<=5?'Ingeniería de verdad: así se aprende.':'Leyenda del debugging.'));
+  $('dpScore').textContent='Errores cometidos: '+e+'. '+r;
+}
+function pushHist(m){var x=m.replace(/^(error|FAIL|AUDITORÍA \w+|advertencia): ?/,'').slice(0,110);if(S.deploy.hist.indexOf(x)===-1&&S.deploy.hist.length<8)S.deploy.hist.push(x);}
+function runDeploy(force,keep){
+  if(dpBusy)return;
+  if(!keep)$('dpOut').innerHTML='';
+  dpActions([]);$('dpStatus').textContent='';
+  S.deploy.tries++;S.deploy.ok=false;
+  var lines=[{t:'$ tind deploy --env produccion'+(force?' --force':''),c:'dim'}],checks=deployChecks(),stopped=null,chaosStop=null,i,s,fs,ws;
+  if(force)lines.push({t:'--force: se ignoran los errores. No lo hagas en la vida real.',c:'warn'});
+  for(i=0;i<STAGES.length;i++){
+    s=STAGES[i];
+    lines.push({t:'['+(i+1)+'/6] '+s.txt+'...',c:'dim',d:420});
+    ws=checks.filter(function(x){return x.st===s.k&&x.warn;});
+    ws.forEach(function(x){lines.push({t:x.m,c:'warn'});});
+    fs=force?[]:checks.filter(function(x){return x.st===s.k&&!x.warn;});
+    if(fs.length){
+      fs.forEach(function(x){lines.push({t:x.m,c:'err',d:380});});
+      lines.push({t:'pipeline detenido en la etapa "'+s.k+'".',c:'err'});
+      stopped=fs;break;
+    }
+    if(s.k==='deploy'){
+      var cz=chaosFor();
+      if(!S.deploy.chaosFixed&&!force){
+        cz.lines.forEach(function(x,k){lines.push({t:x,c:/^error/.test(x)?'err':(/^pista|^advertencia/.test(x)?'warn':'dim'),d:520});});
+        lines.push({t:'pipeline detenido en la etapa "deploy".',c:'err'});
+        chaosStop=cz;break;
+      }
+    }else{lines.push({t:s.ok,c:'ok'});}
+  }
+  if(!stopped&&!chaosStop){
+    lines.push({t:'subiendo archivos...',c:'dim',d:500});
+    lines.push({t:'configurando '+(S.host||'el servidor')+'...',c:'dim',d:500});
+    lines.push({t:'comprobando que el botón principal lleve a alguna parte... sí',c:'dim',d:500});
+    lines.push({t:'https://'+(slug(S.name)||'tu-startup')+'.tuprimerastartup.app  (dirección de ejemplo)',c:'ok'});
+    lines.push({t:'',c:''});
+    lines.push({t:'DEPLOY EXITOSO',c:'ok'});
+    lines.push({t:'Errores en el camino: '+S.deploy.errors+'. Todos cuentan como experiencia.',c:'dim'});
+  }
+  dpPrint(lines,function(){
+    if(stopped){
+      S.deploy.errors++;stopped.forEach(function(x){pushHist(x.m);});save();renderScore();renderNav();
+      var seen={},acts=[];
+      stopped.forEach(function(x){if(!seen[x.go]){seen[x.go]=1;acts.push({label:x.gl,primary:true,fn:function(){show(x.go);}});}});
+      acts.push({label:'Reintentar deploy',fn:function(){runDeploy(false,false);}});
+      dpActions(acts);$('dpStatus').textContent='El deploy falló. Arreglen lo que marca el pipeline y vuelvan a intentar.';
+    }else if(chaosStop){
+      S.deploy.errors++;pushHist(chaosStop.lines[1]);save();renderScore();renderNav();
+      dpActions([{label:chaosStop.fixLabel,primary:true,fn:function(){applyFix(chaosStop);}}]);
+      $('dpStatus').textContent='Error en producción. Hay que arreglarlo.';
+    }else{
+      S.deploy.ok=true;save();renderScore();renderNav();
+      $('dpStatus').textContent='Deploy exitoso. Ya pueden pasar a la entrega.';
+    }
+  });
+}
+function applyFix(c){
+  if(dpBusy)return;
+  dpActions([]);
+  var lines=[{t:'$ '+c.fix[0],c:'dim',d:900}];
+  c.fix.slice(1).forEach(function(x){lines.push({t:x,c:'ok',d:600});});
+  lines.push({t:'reintentando deploy...',c:'dim',d:500});
+  dpPrint(lines,function(){S.deploy.chaosFixed=true;save();runDeploy(false,true);});
+}
+$('dpRun').onclick=function(){runDeploy(false,false);};
+$('dpClear').onclick=function(){if(dpBusy)return;$('dpOut').innerHTML='';dpActions([]);$('dpStatus').textContent='';};
+$('dpForceBtn').onclick=function(){
+  if(nk($('dpForce').value)===nk(MASTER)){runDeploy(true,false);}
+  else{$('dpStatus').textContent='Ese código no es válido. Modo becario: usa el código maestro.';}
+};
+
+function postmortem(){
+  if(!S.deploy.ok)return 'Todavía no hacen deploy. Cuando lo logren, aquí aparecerá su post-mortem.';
+  var c=chaosFor(),name=t(S.name)||'nuestra startup';
+  return '# Post-mortem del deploy de '+name+'\n\n'+
+  'Resumen\n- El deploy falló '+S.deploy.errors+(S.deploy.errors===1?' vez':' veces')+' antes de salir.\n- Incidente principal: '+c.title+'.\n\n'+
+  'Causa raíz\n'+c.root+'\n\n'+
+  'Cómo lo resolvimos\n'+c.fixLabel+'.\n\n'+
+  'Errores que nos encontró el pipeline\n'+(S.deploy.hist.length?S.deploy.hist.map(function(x){return '- '+x;}).join('\n'):'- Ninguno más. Sospechosamente limpio.')+'\n\n'+
+  'Qué hacemos para que no vuelva a pasar\n- '+c.prevent+'\n\n'+
+  'Lección\nEquivocarse en el deploy es parte del trabajo. Lo importante es documentarlo y aprender.';
+}
+function readme(){
+  var name=t(S.name)||'Mi startup',b=benefits(),out=[];
+  out.push('# '+name,'','> '+v(S.slogan,'(slogan)'),'',ideaLine(),'','## Características');
+  out.push(b.length?b.map(function(x){return '- '+x;}).join('\n'):'- (pendiente)');
+  out.push('','## Datos que medimos');
+  out.push(S.data.length?S.data.map(function(x){return '- '+x;}).join('\n'):'- (pendiente)');
+  if(t(S.dataWhy))out.push('','Los usamos para: '+t(S.dataWhy));
+  out.push('','## Infraestructura y seguridad','- Vive '+(S.host||'(pendiente)'));
+  S.sec.forEach(function(x){out.push('- '+x);});
+  out.push('','## Roadmap','- '+(S.future||'(pendiente)')+(t(S.futureWhy)?': '+t(S.futureWhy):''));
+  out.push('','## Changelog');
+  versionList(name).forEach(function(x){out.push('- '+x.v+': '+x.x);});
+  out.push('','## Equipo','- '+v(S.team,'(nombre del equipo)')+' (equipo '+S.num+')','','Hecho en el taller Tu Primera Startup, TIND Anáhuac Querétaro.');
+  return out.join('\n');
+}
+
+/* Selector de formato del producto */
+function renderLayouts(){
+  var box=$('gLayout');box.innerHTML='';
+  var cur=layoutOf(),sug=LAYOUT_KEYS[(S.num-1)%LAYOUT_KEYS.length];
+  LAYOUT_KEYS.forEach(function(k){
+    var lab=document.createElement('label');lab.className='opt';
+    var inp=document.createElement('input');inp.type='radio';inp.name='layout';inp.value=k;inp.checked=cur===k;
+    inp.addEventListener('change',function(){S.layout=k;changed();});
+    var sp=document.createElement('span');sp.innerHTML='<b>'+esc(LAYOUTS[k].label)+(k===sug?' (el que le tocó a tu equipo)':'')+'</b><small>'+esc(LAYOUTS[k].desc)+'</small>';
+    lab.appendChild(inp);lab.appendChild(sp);box.appendChild(lab);
+  });
+}
+$('btnSurprise').onclick=function(){
+  var cur=layoutOf(),opts=LAYOUT_KEYS.filter(function(k){return k!==cur;});
+  S.layout=opts[Math.floor(Math.random()*opts.length)];renderLayouts();changed();
+};
+
+/* Navegación */
+var current='idea',focusSection=null,timer=null;
+function navFor(){
+  if(isCaptain())return NAV;
+  var n=[];
+  if(S.role==='datos'||S.role==='tecnico')n.push({id:'rdatos',file:'consulta.sql',label:'Reto de datos'});
+  if(S.role==='seguridad'||S.role==='tecnico')n.push({id:'rseg',file:'mensaje.enc',label:'Reto de seguridad'});
+  if(S.role==='pitch')n.push({id:'rpitch',file:'futuro.pseudo',label:'Reto del futuro'});
+  n.push({id:'misiones',file:'misiones.log',label:'Misiones'});
+  n.push({id:'eventos',file:'eventos.log',label:'Eventos'});
+  n.push({id:'ensayo',file:'pitch.txt',label:'Ensayo de pitch'});
+  return n;
+}
+function renderNav(){
+  var nav=$('nav');nav.innerHTML='';
+  navFor().forEach(function(n){
+    var b=document.createElement('button');b.type='button';b.className='navbtn';b.setAttribute('data-id',n.id);
+    b.setAttribute('aria-current',n.id===current?'true':'false');
+    var tick='';
+    if(isCaptain()&&(n.id==='datos'||n.id==='infra'||n.id==='futuro')&&!isOpen(n.id)){tick='<span class="tick lock">Bloqueado</span>';}
+    else if(n.id==='misiones'){var ml=missionsFor(S.role),dn=ml.filter(function(m){return msState(m.id).done;}).length;tick='<span class="tick">'+dn+'/'+ml.length+'</span>';}
+    else if(n.id==='mejoras'){var av=availableMissions(),ins=av.filter(function(m){return S.upg[m.id];}).length;tick='<span class="tick">'+ins+'/'+av.length+'</span>';}
+    else if(done(n.id)){tick='<span class="tick">Listo</span>';}
+    b.innerHTML='<span class="file">'+n.file+'</span><span class="lbl">'+n.label+'</span>'+tick;
+    b.onclick=function(){show(n.id);};
+    nav.appendChild(b);
+  });
+  if(isCaptain()){
+    var rounds=['idea','producto','datos','infra','futuro'],c=rounds.filter(done).length;
+    $('progText').textContent=c+' de 5 rondas listas';
+    $('meter').style.width=(c*20)+'%';
+    $('v1ok').hidden=!(done('idea')&&done('producto'));
+    $('ver').textContent=lastVersion();
+    $('url').textContent=(t(S.name)?t(S.name).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''):'tu-startup')+'.app';
+  }else{$('v1ok').hidden=true;}
+}
+function show(id){
+  current=id;
+  document.querySelectorAll('[data-panel]').forEach(function(p){p.hidden=p.getAttribute('data-panel')!==id;});
+  focusSection=SECTION_OF[id]||null;
+  if(id==='entrega')fillOutputs();
+  if(id==='misiones')renderMissionList();
+  if(id==='mejoras')renderMejoras();
+  renderNav();
+  if(isCaptain()){fitPreview();updatePreview();}
+  $('editor').scrollTop=0;window.scrollTo(0,0);
+}
+function fitPreview(){
+  var w=$('pframe'),f=$('frame');if(!w||!f)return;
+  var W=w.clientWidth,H=w.clientHeight;if(!W||!H)return;
+  if(window.innerWidth>1100&&W<920){var sc=W/920;f.style.width='920px';f.style.height=Math.ceil(H/sc)+'px';f.style.transform='scale('+sc+')';}
+  else{f.style.width=W+'px';f.style.height=H+'px';f.style.transform='none';}
+}
+window.addEventListener('resize',fitPreview);
+function updatePreview(){
+  var f=$('frame'),y=0;
+  try{y=f.contentWindow.scrollY||0;}catch(e){}
+  var target=focusSection;focusSection=null;
+  f.onload=function(){
+    try{
+      var d=f.contentDocument,el=target&&d.getElementById(target);
+      if(el&&target!=='top'){el.scrollIntoView();}
+      else if(target==='top'){f.contentWindow.scrollTo(0,0);}
+      else{f.contentWindow.scrollTo(0,y);}
+    }catch(e){}
+  };
+  f.srcdoc=buildDoc();
+}
+function changed(){
+  save();renderNav();updateEvBadge();$('ideaHint').textContent='Tu idea: '+ideaLine();
+  if(isCaptain()){clearTimeout(timer);timer=setTimeout(updatePreview,250);}
+}
+
+/* Campos de texto */
+document.querySelectorAll('[data-k]').forEach(function(el){
+  var k=el.getAttribute('data-k');el.value=S[k]||'';
+  el.addEventListener('input',function(){S[k]=el.value;changed();});
+});
+
+/* Grupos de opciones */
+function renderGroup(boxId,opts,key,multi,cls){
+  var box=$(boxId);box.innerHTML='';
+  opts.forEach(function(o){
+    var val=typeof o==='string'?o:o[0],label=typeof o==='string'?o:o[1];
+    var lab=document.createElement('label');lab.className='opt';
+    var inp=document.createElement('input');inp.type=multi?'checkbox':'radio';inp.name=key;inp.value=val;
+    inp.checked=multi?S[key].indexOf(val)!==-1:S[key]===val;
+    inp.addEventListener('change',function(){
+      if(multi){S[key]=Array.prototype.map.call(box.querySelectorAll('input:checked'),function(i){return i.value;});}
+      else{S[key]=val;}
+      changed();
+    });
+    var sp=document.createElement('span');sp.textContent=label;
+    lab.appendChild(inp);lab.appendChild(sp);
+    if(cls==='emoji'){lab.setAttribute('aria-label','Ícono '+label);}
+    box.appendChild(lab);
+  });
+}
+renderGroup('gStyle',Object.keys(THEMES).map(function(k){return [k,THEMES[k].label];}),'style',false);
+renderGroup('gEmoji',EMOJIS,'emoji',false,'emoji');
+renderGroup('gData',DATA_OPTS,'data',true);
+renderGroup('gHost',HOSTS,'host',false);
+renderGroup('gSec',SEC_OPTS,'sec',true);
+renderGroup('gFuture',FUTURE,'future',false);
+
+/* Eventos: desafíos por rol que se resuelven con una clave para Producto */
+var EV_CH={
+ 'HK-01':{role:'seguridad',type:'stream',title:'Bloquea al intruso',intro:'Un ataque como este empieza con intentos de acceso. Los equipos de seguridad los vigilan en tiempo real y bloquean los sospechosos antes de que entren.',ask:'Entran intentos de acceso a su sistema. Toca los sospechosos antes de que pasen.',
+   good:['ana  entra desde Querétaro  10:02','leo  entra desde Querétaro  10:15','sofi  entra desde Monterrey  10:31','diego  entra desde Querétaro  11:04','valeria  entra desde Puebla  11:20','mateo  entra desde Querétaro  11:48','ana  cierra sesión  12:05','leo  cambia su foto de perfil  12:30'],
+   bad:['admin  entra desde país desconocido  03:14  48 intentos fallidos antes','root  40 intentos fallidos seguidos  IP 91.204.1.9','admin  entra con la contraseña 123456  IP 185.23.9.77','usuario nuevo con permisos de administrador  creado a las 3:30','cuenta de leo  entra desde dos países a la vez'],
+   total:14,badCount:5,need:4,maxFalse:2,
+   why:'Un ataque de fuerza bruta prueba muchas contraseñas hasta acertar. Se detecta por los intentos fallidos, la hora y el origen, y se bloquea con límites de intentos. Se estudia en Seguridad Informática.'},
+ 'NB-06':{role:'seguridad',type:'log',title:'Encuentra el servidor caído',intro:'Cuando algo falla en la nube, lo primero es mirar el estado de cada servidor.',ask:'Toca el servidor que está fallando.',
+   normal:['web-01       OK     respuesta 120 ms','web-02       OK     respuesta 98 ms','base-datos   OK     respuesta 40 ms','cache        OK     respuesta 8 ms','correo       OK     respuesta 210 ms','respaldos    OK     última copia hace 1 hora'],
+   bad:'nube-region-2  ERROR  sin respuesta hace 4 horas',
+   hint:'Busca la palabra que no es OK.',
+   why:'El servidor de la región 2 no responde. Por eso un producto serio no depende de un solo lugar: usa copias y otra región de respaldo. Se estudia en Infraestructura y Nube.'},
+ 'FK-10':{role:'seguridad',type:'stream',title:'Bloquea las cuentas falsas',intro:'Detectar robots es parte del trabajo de seguridad. Se revisan los registros nuevos y se frena a los falsos antes de que entren.',ask:'Se están registrando cuentas nuevas. Toca las que parecen falsas antes de que entren.',
+   good:['ana.garcia  ana@mail.com  registro tranquilo','leo_r  leo.r@escuela.mx  registro tranquilo','sofia.m  sofia@mail.com  registro tranquilo','diego.t  diego@mail.com  registro tranquilo','valeria.q  vale.q@mail.com  registro tranquilo','mateo.s  mateo@escuela.mx  registro tranquilo'],
+   bad:['usr88413  zzq91@tmp-mail.xyz  registrada en 2 segundos','bot_5521  correo desechable  mismo teléfono que otras 40 cuentas','cuenta_77x  contraseña 123456  creada por un programa','usr90210  zzq91@tmp-mail.xyz  idéntica a otras 40 cuentas'],
+   total:14,badCount:5,need:4,maxFalse:2,
+   why:'Una cuenta registrada en segundos, con correo temporal y copiada decenas de veces es un robot. Se frena con verificación de correo y límites de registro.'},
+ 'AP-09':{role:'seguridad',type:'mc',title:'IA responsable',intro:'Piden que el equipo muestre que usa la IA con responsabilidad.',q:'¿Qué ayuda más a demostrarlo?',
+   opts:[{ok:true,t:'Avisar cuándo la persona habla con una IA y dejar que una persona revise las decisiones importantes'},{t:'No decir que se usa IA para no preocupar a nadie',fb:'Esconder el uso de IA genera desconfianza.'},{t:'Poner “IA” en el logo y ya',fb:'Un logo no demuestra responsabilidad.'},{t:'Que nadie sepa cómo toma decisiones',fb:'La transparencia es parte de la responsabilidad.'}],
+   why:'La transparencia y la revisión humana son la base de una IA responsable. Lo ves en Legislación Informática y en Inteligencia Artificial.'},
+ 'LY-02':{role:'datos',type:'sql',title:'Cumple la ley con una consulta',intro:'La nueva ley exige localizar rápido a ciertas personas en los datos del producto. Una consulta SQL lo resuelve en segundos.'},
+ 'IV-05':{role:'datos',type:'sql',title:'Muestra los números al inversionista',intro:'La persona inversionista quiere ver números reales de ventas. Pídele a la base de datos solo lo que necesita.'},
+ 'VI-07':{role:'datos',type:'sql',title:'Entiende de dónde llega tu tráfico',intro:'Llegaron muchas visitas de golpe. Averigua de dónde vienen para saber qué reforzar.'},
+ 'DT-11':{role:'datos',type:'sql',title:'Descubre a ese grupo inesperado',intro:'Los datos muestran un grupo que usa más el producto. Identifícalo con una consulta.'},
+ 'IA-03':{role:'pitch',type:'mc',title:'Elige qué automatizar',intro:'Una IA gratuita puede encargarse de tareas. No todo conviene automatizarlo.',q:'¿Qué conviene automatizar primero en la app del equipo?',
+   opts:[{ok:true,t:'Responder las preguntas frecuentes de los usuarios'},{t:'Decidir reembolsos sin que nadie los revise',fb:'Una decisión con dinero necesita revisión humana.'},{t:'Borrar cuentas reportadas de forma automática',fb:'Podrías borrar cuentas legítimas por error.'},{t:'Cambiar los precios sin avisar',fb:'Eso rompe la confianza de los usuarios.'}],
+   why:'Automatiza lo repetitivo y de bajo riesgo; deja a las personas lo delicado. Es una decisión de producto con IA.'},
+ 'CP-04':{role:'pitch',type:'mc',title:'Responde al gigante',intro:'Llegó un competidor enorme. Tienes que decidir cómo responder.',q:'¿Qué respuesta construye una ventaja a largo plazo?',
+   opts:[{ok:true,t:'Enfocarte en un grupo de usuarios que ellos no atienden y conocerlo mejor'},{t:'Copiar todas sus funciones',fb:'Siempre llegarás tarde y sin diferenciarte.'},{t:'Regalar tu producto',fb:'Sin ingresos no puedes mantenerlo.'},{t:'Ignorarlo por completo',fb:'Ignorar a un competidor grande es arriesgado.'}],
+   why:'Las startups ganan siendo especialistas: conocen mejor a un grupo concreto. Eso es emprendimiento e innovación.'},
+ 'RA-08':{role:'pitch',type:'mc',title:'Primer paso con realidad aumentada',intro:'La realidad aumentada se volvió popular. ¿Cómo empiezas sin arriesgar todo?',q:'¿Cuál es el primer paso razonable?',
+   opts:[{ok:true,t:'Probar una función pequeña en realidad aumentada con pocos usuarios'},{t:'Reconstruir todo el producto en realidad aumentada',fb:'Es muy caro y arriesgado sin probar antes.'},{t:'Esperar cinco años a ver qué pasa',fb:'Perderías la oportunidad.'},{t:'Comprar lentes para todo el equipo sin un plan',fb:'Primero hay que saber qué probar.'}],
+   why:'Se prueba pequeño y se aprende rápido. Lo trabajas en Realidad Virtual y Aumentada.'},
+ 'UP-12':{role:'pitch',type:'order',title:'Publica sin romper nada',intro:'Una actualización rompió el botón principal. Ordena los pasos para publicar cambios con seguridad.',
+   steps:['Escribir el cambio','Probarlo en un ambiente de pruebas','Pedir que otra persona lo revise','Publicarlo para los usuarios','Vigilar que todo siga funcionando'],
+   why:'Probar, revisar, publicar y vigilar evita sorpresas. Es parte de Calidad de Software.'}
+};
+var EV_SQL={
+ 'LY-02':{table:'registros',cols:['nombre','ubicacion','consentimiento'],rows:[['Ana','Centro','si'],['Luis','Norte','no'],['Sofia','Sur','si'],['Diego','Centro','no'],['Valeria','Norte','si'],['Mateo','Sur','no']],
+   variants:[{sel:['nombre','ubicacion'],f:'consentimiento',v:'no',task:'«La ley me pide revisar a quienes NO dieron consentimiento. Muéstrame el nombre y la ubicación de esas personas.»'},{sel:['nombre','consentimiento'],f:'ubicacion',v:'Norte',task:'«La ley me pide revisar primero la zona Norte. Muéstrame el nombre y el consentimiento de las personas que están en el Norte.»'}]},
+ 'IV-05':{table:'ventas',cols:['producto','ciudad','monto','mes'],rows:[['Pulsera','Querétaro',120,'enero'],['Funda','Monterrey',80,'enero'],['Pulsera','Monterrey',150,'febrero'],['Cargador','Querétaro',60,'febrero'],['Funda','Querétaro',95,'marzo'],['Cargador','Monterrey',70,'marzo']],
+   variants:[{sel:['producto','monto'],f:'ciudad',v:'Querétaro',task:'«Quiero ver el producto y el monto de las ventas en Querétaro.»'},{sel:['producto','mes'],f:'ciudad',v:'Monterrey',task:'«Quiero ver el producto y el mes de las ventas en Monterrey.»'}]},
+ 'VI-07':{table:'visitas',cols:['pais','idioma','usuarios'],rows:[['México','español',500],['Estados Unidos','ingles',300],['Brasil','portugues',200],['España','español',150],['Canadá','ingles',90]],
+   variants:[{sel:['pais','usuarios'],f:'idioma',v:'ingles',task:'«Muéstrame el país y los usuarios de quienes usan la app en inglés (en la tabla aparece como ingles).»'},{sel:['pais','usuarios'],f:'idioma',v:'portugues',task:'«Muéstrame el país y los usuarios de quienes usan la app en portugués (en la tabla aparece como portugues).»'}]},
+ 'DT-11':{table:'usos',cols:['nombre','edad','momento'],rows:[['Ana',17,'noche'],['Luis',45,'madrugada'],['Sofía',70,'mañana'],['Diego',16,'madrugada'],['Valeria',68,'tarde'],['Mateo',52,'madrugada']],
+   variants:[{sel:['nombre','edad'],f:'momento',v:'madrugada',task:'«Muéstrame el nombre y la edad de quienes usan la app de madrugada.»'},{sel:['nombre','edad'],f:'momento',v:'noche',task:'«Muéstrame el nombre y la edad de quienes usan la app de noche.»'}]}
+};
+function evIndex(code){for(var i=0;i<EVENTS.length;i++){if(EVENTS[i].c===code)return i;}return 0;}
+function evKey(code){var i=evIndex(code);return WORDS[(S.num*3+i*5)%WORDS.length]+'-'+(((S.num*11+i*7)%80)+20);}
+function sqlSpecEvent(code){
+  var d=EV_SQL[code],v=d.variants[(S.num+evIndex(code))%d.variants.length],rows=d.rows.map(function(r){var o={};d.cols.forEach(function(c,i){o[c]=r[i];});return o;});
+  return {table:d.table,cols:d.cols,rows:rows,sel:v.sel,f:v.f,v:v.v,task:v.task};
+}
+/* Qué rol resuelve el desafío en este equipo (null = no hay desafío o se abre solo) */
+function respRole(ev){
+  var cfg=EV_CH[ev.c];if(!cfg)return null;
+  var roles=SIZES[S.size]||SIZES[1];
+  if(roles.length<=1)return null;
+  if(roles.indexOf(cfg.role)!==-1)return cfg.role;
+  if(cfg.role==='pitch'){if(roles.indexOf('datos')!==-1)return 'datos';if(roles.indexOf('tecnico')!==-1)return 'tecnico';}
+  if((cfg.role==='datos'||cfg.role==='seguridad')&&roles.indexOf('tecnico')!==-1)return 'tecnico';
+  return null;
+}
+function evUnlocked(ev){return !respRole(ev)||!!S.evOk[ev.c];}
+function chState(code){if(!S.ch[code])S.ch[code]={done:false,w:{}};if(!S.ch[code].w)S.ch[code].w={};return S.ch[code];}
+function seedShuffle(n,seed){
+  var a=[],i,j,tmp,s=(seed*2654435761)>>>0;
+  for(i=0;i<n;i++)a.push(i);
+  function rnd(){s=(s*1664525+1013904223)>>>0;return s/4294967296;}
+  for(i=n-1;i>0;i--){j=Math.floor(rnd()*(i+1));tmp=a[i];a[i]=a[j];a[j]=tmp;}
+  return a;
+}
+function keyPanel(key,why,label){
+  return '<div class="lockbox" style="border-color:var(--teal);background:#16211F"><h3 style="color:var(--teal)">¡Resuelto!</h3>'+(why?'<p>'+esc(why)+'</p>':'')+
+    '<div class="keybox">'+esc(key)+'</div><p style="margin:0">'+esc(label||'CLAVE DEL EVENTO')+'. Díctasela en voz alta a Producto.</p></div>';
+}
+function logWidget(body,cfg,st,key,idx,finished){
+  var w=st.w;if(!w.bad)w.bad=[];
+  var n=cfg.normal.length,p=(S.num*3+idx)%(n+1),arr=cfg.normal.slice();
+  arr.splice(p,0,cfg.bad);
+  function draw(msg){
+    if(st.done){body.innerHTML=keyPanel(key,cfg.why,cfg.klabel);return;}
+    var h='<p class="lead" style="margin-bottom:8px">'+esc(cfg.ask)+'</p><div class="loglines">';
+    arr.forEach(function(l,i){h+='<button type="button" class="logline'+(w.bad.indexOf(i)!==-1?' no':'')+'" data-i="'+i+'">'+esc(l)+'</button>';});
+    h+='</div><p class="msg" role="status" aria-live="polite">'+esc(msg||'')+'</p>';
+    body.innerHTML=h;
+    Array.prototype.forEach.call(body.querySelectorAll('.logline'),function(b){
+      b.onclick=function(){
+        var i=parseInt(b.getAttribute('data-i'),10);
+        if(arr[i]===cfg.bad){finished();draw();}
+        else{if(w.bad.indexOf(i)===-1)w.bad.push(i);save();draw('Esa línea parece normal.'+(w.bad.length>=2?' Pista: '+cfg.hint:''));}
+      };
+    });
+  }
+  draw();
+}
+function mcWidget(body,cfg,st,key,idx,finished){
+  var w=st.w;if(!w.bad)w.bad=[];
+  var order=seedShuffle(cfg.opts.length,S.num+idx*7);
+  function draw(msg){
+    if(st.done){body.innerHTML=keyPanel(key,cfg.why,cfg.klabel);return;}
+    var h='<p class="lead" style="margin-bottom:8px"><b>'+esc(cfg.q)+'</b></p><div class="mc">';
+    order.forEach(function(oi){h+='<button type="button" class="mcopt'+(w.bad.indexOf(oi)!==-1?' no':'')+'" data-i="'+oi+'">'+esc(cfg.opts[oi].t)+'</button>';});
+    h+='</div><p class="msg" role="status" aria-live="polite">'+esc(msg||'')+'</p>';
+    body.innerHTML=h;
+    Array.prototype.forEach.call(body.querySelectorAll('.mcopt'),function(b){
+      b.onclick=function(){
+        var oi=parseInt(b.getAttribute('data-i'),10),o=cfg.opts[oi];
+        if(o.ok){finished();draw();}
+        else{if(w.bad.indexOf(oi)===-1)w.bad.push(oi);save();draw(o.fb||'Esa no es la mejor opción.');}
+      };
+    });
+  }
+  draw();
+}
+function orderWidget(body,cfg,st,key,idx,finished){
+  var w=st.w,n=cfg.steps.length;
+  if(!w.order||w.order.length!==n){
+    var o=seedShuffle(n,S.num+idx*5),k=0;
+    while(o.every(function(x,i){return x===i;})&&k<10){o=seedShuffle(n,S.num+idx*5+(++k));}
+    w.order=o;
+  }
+  function draw(msg){
+    if(st.done){body.innerHTML=keyPanel(key,cfg.why,cfg.klabel);return;}
+    var h='<p class="lead" style="margin-bottom:8px">Usa las flechas para ordenar los pasos, del primero al último.</p><ol class="pz">';
+    w.order.forEach(function(si,pos){
+      h+='<li><span>'+esc(cfg.steps[si])+'</span><button type="button" data-up="'+pos+'" aria-label="Subir paso"'+(pos===0?' disabled':'')+'>▲</button><button type="button" data-dn="'+pos+'" aria-label="Bajar paso"'+(pos===n-1?' disabled':'')+'>▼</button></li>';
+    });
+    h+='</ol><div class="bar2" style="margin-top:0"><button type="button" class="btn primary" data-check="1">Comprobar orden</button></div><p class="msg" role="status" aria-live="polite">'+esc(msg||'')+'</p>';
+    body.innerHTML=h;
+    Array.prototype.forEach.call(body.querySelectorAll('[data-up]'),function(b){b.onclick=function(){var p=parseInt(b.getAttribute('data-up'),10),x=w.order[p];w.order[p]=w.order[p-1];w.order[p-1]=x;save();draw();};});
+    Array.prototype.forEach.call(body.querySelectorAll('[data-dn]'),function(b){b.onclick=function(){var p=parseInt(b.getAttribute('data-dn'),10),x=w.order[p];w.order[p]=w.order[p+1];w.order[p+1]=x;save();draw();};});
+    body.querySelector('[data-check]').onclick=function(){
+      if(w.order.every(function(x,i){return x===i;})){finished();draw();}
+      else{draw('Todavía no. Piensa qué pasaría si algo falla justo después de publicar sin haberlo probado.');}
+    };
+  }
+  draw();
+}
+/* Retos de seguridad más dinámicos */
+function runWidget(type,body,cfg,st,key,idx,finished){
+  if(type==='log')logWidget(body,cfg,st,key,idx,finished);
+  else if(type==='mc')mcWidget(body,cfg,st,key,idx,finished);
+  else if(type==='order')orderWidget(body,cfg,st,key,idx,finished);
+  else if(type==='stream')streamWidget(body,cfg,st,key,idx,finished);
+  else if(type==='pin')pinWidget(body,cfg,st,key,idx,finished);
+  else if(type==='pass')passWidget(body,cfg,st,key,idx,finished);
+  else if(type==='phish')phishWidget(body,cfg,st,key,idx,finished);
+  else cipherWidget(body,cfg,st,key,idx,finished);
+}
+
+/* Bloquea las amenazas antes de que pasen */
+function streamWidget(body,cfg,st,key,idx,finished){
+  var timer=null,tries=st.w.tries||0;
+  function stop(){if(timer){clearInterval(timer);timer=null;}}
+  function intro(msg){
+    stop();
+    if(st.done){body.innerHTML=keyPanel(key,cfg.why,cfg.klabel);return;}
+    body.innerHTML='<p class="lead">'+esc(cfg.ask)+'</p>'+
+      '<p class="lead" style="margin-bottom:8px">Bloquea al menos <b>'+cfg.need+'</b> de las <b>'+cfg.badCount+'</b> amenazas y equivócate como máximo <b>'+cfg.maxFalse+'</b> '+(cfg.maxFalse===1?'vez':'veces')+'. Cada elemento desaparece en unos segundos, así que hay que ser rápido.</p>'+
+      (msg?'<p class="msg" role="status">'+esc(msg)+'</p>':'')+
+      '<div class="bar2" style="margin-top:0"><button type="button" class="btn primary" id="stStart">'+(msg?'Reintentar':'Empezar')+'</button></div>';
+    body.querySelector('#stStart').onclick=run;
+  }
+  function run(){
+    tries++;st.w.tries=tries;save();
+    var total=cfg.total,seed=S.num*17+idx*5+tries,pool=[],i,sh,badSet={},items=[];
+    for(i=2;i<total;i++)pool.push(i);
+    sh=seedShuffle(pool.length,seed);
+    for(i=0;i<cfg.badCount;i++)badSet[pool[sh[i]]]=true;
+    var bo=seedShuffle(cfg.bad.length,seed),go=seedShuffle(cfg.good.length,seed+3),bi=0,gi=0;
+    for(i=0;i<total;i++){
+      var bad=!!badSet[i];
+      items.push({t:bad?cfg.bad[bo[(bi++)%bo.length]]:cfg.good[go[(gi++)%go.length]],bad:bad,done:false,el:null,exp:0});
+    }
+    body.innerHTML='<p class="lead" style="margin-bottom:6px">'+esc(cfg.ask)+'</p><p id="stScore" class="lead" style="margin-bottom:8px" aria-live="polite"></p><div id="stList" class="pklist"></div>';
+    var list=body.querySelector('#stList'),score=body.querySelector('#stScore');
+    var blocked=0,errors=0,passed=0,next=0,nextAt=Date.now()+600,every=cfg.every||1400,life=cfg.life||3300;
+    function upd(){score.textContent='Bloqueadas: '+blocked+' de '+cfg.badCount+'. Errores: '+errors+'. Se colaron: '+passed+'.';}
+    function drop(it,delay){setTimeout(function(){if(it.el&&it.el.parentNode)it.el.parentNode.removeChild(it.el);},delay);}
+    function tap(it){
+      if(it.done)return;
+      it.done=true;it.el.disabled=true;
+      if(it.bad){blocked++;it.el.className='pk ok';it.el.textContent='Bloqueado: '+it.t;}
+      else{errors++;it.el.className='pk no';it.el.textContent='Era normal: '+it.t;}
+      upd();drop(it,1100);
+    }
+    upd();
+    timer=setInterval(function(){
+      if(!document.body.contains(body)){stop();return;}
+      var now=Date.now(),k;
+      if(next<total&&now>=nextAt){
+        var it=items[next++];
+        var b=document.createElement('button');b.type='button';b.className='pk';b.textContent=it.t;
+        it.el=b;it.exp=now+life;b.onclick=function(){tap(it);};
+        list.insertBefore(b,list.firstChild);nextAt=now+every;
+      }
+      for(k=0;k<next;k++){
+        var x=items[k];
+        if(!x.done&&now>=x.exp){
+          x.done=true;x.el.disabled=true;
+          if(x.bad){passed++;x.el.className='pk no';x.el.textContent='Se coló: '+x.t;upd();drop(x,1100);}
+          else{drop(x,0);}
+        }
+      }
+      if(next>=total&&items.every(function(y){return y.done;})){
+        stop();
+        if(blocked>=cfg.need&&errors<=cfg.maxFalse){finished();setTimeout(function(){intro();},700);}
+        else{setTimeout(function(){intro('No alcanzó. Bloqueaste '+blocked+' de '+cfg.badCount+' con '+errors+' '+(errors===1?'error':'errores')+'. Inténtalo otra vez.');},900);}
+      }
+    },150);
+  }
+  intro();
+}
+
+/* Adivina el PIN con pistas */
+function pinWidget(body,cfg,st,key,idx,finished){
+  var w=st.w,n=cfg.digits||4;
+  if(!w.secret||w.secret.length!==n){w.secret=seedShuffle(10,S.num*13+idx*7).slice(0,n).join('');w.guesses=[];}
+  function score(g){var ex=0,ot=0,i;for(i=0;i<n;i++){if(g.charAt(i)===w.secret.charAt(i))ex++;else if(w.secret.indexOf(g.charAt(i))!==-1)ot++;}return [ex,ot];}
+  function draw(msg){
+    if(st.done){body.innerHTML=keyPanel(key,cfg.why,cfg.klabel);return;}
+    var h='<p class="lead">'+esc(cfg.ask)+'</p><div class="codeinput"><input type="text" id="pnIn" inputmode="numeric" maxlength="'+n+'" autocomplete="off" placeholder="'+'0123456789'.slice(0,n)+'" aria-label="Tu intento"><button type="button" class="btn primary" id="pnTry">Probar</button></div><p class="msg" role="status" aria-live="polite">'+esc(msg||'')+'</p>';
+    if(w.guesses.length){
+      h+='<div class="tblwrap"><table class="dt"><tr><th>Intento</th><th>En su lugar</th><th>En otro lugar</th></tr>'+
+        w.guesses.map(function(g){var r=score(g);return '<tr><td>'+esc(g)+'</td><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>';}).join('')+'</table></div>';
+    }
+    if(w.guesses.length>=6)h+='<div class="bar2" style="margin-top:0"><button type="button" class="btn" id="pnHint">Pista</button></div>';
+    body.innerHTML=h;
+    var inp=body.querySelector('#pnIn');
+    function tryIt(){
+      var g=inp.value.replace(/\D/g,'');
+      if(g.length!==n){draw('Escribe exactamente '+n+' dígitos.');return;}
+      w.guesses.push(g);save();
+      if(g===w.secret){finished();draw();return;}
+      var r=score(g);
+      draw(r[0]+' en su lugar y '+r[1]+' en otro lugar. Sigue probando.');
+    }
+    body.querySelector('#pnTry').onclick=tryIt;
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter')tryIt();});
+    var hb=body.querySelector('#pnHint');
+    if(hb)hb.onclick=function(){draw('Pista: el primer dígito del PIN es '+w.secret.charAt(0)+'.');};
+    if(!msg)inp.focus();
+  }
+  draw();
+}
+
+/* Contraseña a prueba de robots */
+function passWidget(body,cfg,st,key,idx,finished){
+  function rules(p){
+    var nm=(t(S.name)||t(S.team)).toLowerCase();
+    var obvious=/(contrase|password|1234|qwerty|admin|tind|startup)/i.test(p)||(nm.length>=3&&p.toLowerCase().indexOf(nm)!==-1);
+    return [
+      {t:'Al menos 12 caracteres',ok:p.length>=12},
+      {t:'Una letra minúscula',ok:/[a-z]/.test(p)},
+      {t:'Una letra mayúscula',ok:/[A-Z]/.test(p)},
+      {t:'Un número',ok:/\d/.test(p)},
+      {t:'Un símbolo, por ejemplo ! ? # $ %',ok:/[^A-Za-z0-9]/.test(p)},
+      {t:'Sin palabras obvias (contraseña, 1234, qwerty, el nombre del equipo)',ok:!obvious&&p.length>0}
+    ];
+  }
+  function crackTime(p){
+    if(!p)return '';
+    if(/(contrase|password|1234|qwerty|admin|123456)/i.test(p))return 'menos de un segundo';
+    var pool=(/[a-z]/.test(p)?26:0)+(/[A-Z]/.test(p)?26:0)+(/\d/.test(p)?10:0)+(/[^A-Za-z0-9]/.test(p)?33:0);
+    var secs=Math.pow(pool||1,p.length)/1e10;
+    if(secs<1)return 'menos de un segundo';
+    if(secs<60)return Math.round(secs)+' segundos';
+    if(secs<3600)return Math.round(secs/60)+' minutos';
+    if(secs<86400)return Math.round(secs/3600)+' horas';
+    if(secs<31536000)return Math.round(secs/86400)+' días';
+    if(secs<3.15e9)return Math.round(secs/31536000)+' años';
+    return 'siglos';
+  }
+  function draw(){
+    if(st.done){body.innerHTML=keyPanel(key,cfg.why,cfg.klabel);return;}
+    body.innerHTML='<p class="lead">'+esc(cfg.ask)+'</p>'+
+      '<label class="field"><span>Contraseña de práctica</span><input type="text" id="psIn" autocomplete="off" spellcheck="false" aria-label="Contraseña de práctica"><small>Es solo un ejercicio: inventa una que no uses en ningún lado.</small></label>'+
+      '<ul class="rules2" id="psRules"></ul><p class="lead" id="psTime" aria-live="polite"></p>';
+    var inp=body.querySelector('#psIn');
+    function upd(){
+      var p=inp.value,rs=rules(p);
+      body.querySelector('#psRules').innerHTML=rs.map(function(r){return '<li class="'+(r.ok?'ok':'no')+'">'+(r.ok?'Cumple: ':'Falta: ')+esc(r.t)+'</li>';}).join('');
+      var ct=crackTime(p);
+      body.querySelector('#psTime').innerHTML=p?'Un robot la adivinaría en: <b>'+esc(ct)+'</b>.':'';
+      if(rs.every(function(r){return r.ok;})){finished();draw();}
+    }
+    inp.addEventListener('input',upd);upd();
+  }
+  draw();
+}
+
+/* Caza las señales de un mensaje falso */
+function phishWidget(body,cfg,st,key,idx,finished){
+  var w=st.w,m=cfg.messages[(S.num+idx)%cfg.messages.length];
+  if(!w.found)w.found=[];
+  if(!w.wrong)w.wrong=[];
+  var need=m.parts.filter(function(p){return p.flag;}).length;
+  function draw(msg){
+    if(st.done){body.innerHTML=keyPanel(key,cfg.why,cfg.klabel);return;}
+    var h='<p class="lead">'+esc(cfg.ask)+' Encuentra las <b>'+need+'</b> señales de que es un engaño. Llevas '+w.found.length+' de '+need+'.</p><div class="mail">';
+    m.parts.forEach(function(p){
+      var cls='phel'+(w.found.indexOf(p.id)!==-1?' ok':(w.wrong.indexOf(p.id)!==-1?' no':''));
+      h+='<button type="button" class="'+cls+'" data-id="'+p.id+'"><span class="pl">'+esc(p.label)+'</span> '+esc(p.text)+'</button>';
+    });
+    h+='</div><p class="msg" role="status" aria-live="polite">'+esc(msg||'')+'</p>';
+    body.innerHTML=h;
+    Array.prototype.forEach.call(body.querySelectorAll('.phel'),function(b){
+      b.onclick=function(){
+        var id=b.getAttribute('data-id'),p=m.parts.filter(function(x){return x.id===id;})[0];
+        if(p.flag){
+          if(w.found.indexOf(id)===-1)w.found.push(id);
+          save();
+          if(w.found.length>=need){finished();draw();}
+          else draw('Correcto: '+p.why);
+        }else{
+          if(w.wrong.indexOf(id)===-1)w.wrong.push(id);
+          save();draw(p.fb);
+        }
+      };
+    });
+  }
+  draw();
+}
+
+function renderChallenge(host,ev){
+  var cfg=EV_CH[ev.c],st=chState(ev.c),key=evKey(ev.c),idx=evIndex(ev.c);
+  host.innerHTML='<div class="chtitle">Tu desafío: '+esc(cfg.title)+'</div><p class="lead">'+esc(cfg.intro)+'</p><div id="chBody"></div>';
+  var body=host.querySelector('#chBody');
+  function finished(){st.done=true;save();upsertEvent(ev,null);updateEvBadge();}
+  if(cfg.type==='sql'){
+    var sp=sqlSpecEvent(ev.c);sp.key=key;sp.keyLabel='CLAVE DEL EVENTO';sp.to='Producto';
+    if(st.done)st.w.solved=true;
+    sqlWidget(body,sp,st.w,finished);
+  }
+  else runWidget(cfg.type,body,cfg,st,key,idx,finished);
+}
+function openEventDialog(ev){$('evDlg').hidden=false;showEvStep2(ev);}
+
+/* Eventos */
+function renderEvents(){
+  var box=$('evList');box.innerHTML='';
+  var cap=isCaptain();
+  $('evLead').textContent=cap
+    ?'Cuando salga un anuncio en la pantalla del salón, toca el botón ⚡ Evento (siempre está visible) y escribe el código. Cada evento trae un desafío para uno de los roles: esa persona lo resuelve y te dicta la clave del evento para que puedas decidir. Cada decisión crea una versión nueva de su producto.'
+    :'Cuando salga un anuncio en la pantalla del salón, toca el botón ⚡ Evento y escribe el código. Si el desafío es de tu rol, resuélvelo y dicta la clave del evento a Producto. Si no, ayuda a pensar con tu equipo.';
+  $('evNav').hidden=!cap;updateEvBadge();
+  if(!S.events.length){box.innerHTML='<p class="lead">Todavía no han aplicado ningún evento.</p>';return;}
+  var roles=SIZES[S.size]||SIZES[1];
+  S.events.forEach(function(x,i){
+    var ev=evByCode(x.c);if(!ev)return;
+    var d=document.createElement('div');d.className='evcard '+ev.t;
+    var rp='<ul class="rp">'+roles.map(function(r){return '<li><b>'+esc(ROLES[r].name)+':</b> '+esc(ROLES[r].ask)+'</li>';}).join('')+'</ul>';
+    var resp=respRole(ev),cfg=EV_CH[ev.c],extra='';
+    if(cap){
+      if(resp&&!evUnlocked(ev)){extra='<p class="lockev">Para decidir falta la clave de este evento. La tiene el rol <b>'+esc(ROLES[resp].name)+'</b>.</p><button type="button" class="btn primary" data-open="1">Ingresar clave</button>';}
+      else{extra='<label>'+esc(ev.ask)+'<textarea rows="3" placeholder="Escriban la decisión del equipo"></textarea></label>';}
+    }else if(resp===S.role&&cfg){
+      var done=S.ch[ev.c]&&S.ch[ev.c].done;
+      extra=done?'<p class="lead" style="margin:8px 0 6px">Desafío resuelto. Clave del evento: <b class="code">'+esc(evKey(ev.c))+'</b></p><button type="button" class="btn" data-open="1">Ver desafío</button>'
+                :'<button type="button" class="btn primary" data-open="1">Resolver mi desafío</button>';
+    }else if(resp&&cfg){extra='<p class="lead" style="margin:8px 0 0">El desafío de este evento le toca a <b>'+esc(ROLES[resp].name)+'</b>.</p>';}
+    d.innerHTML='<div class="evh"><span class="tag">'+(ev.t==='ayuda'?'Ayuda':'Perjudica')+'</span><b>'+esc(ev.title)+'</b>'+(cap?'<span class="ver">v1.'+(i+1)+'</span>':'')+'</div>'+
+      '<p>'+esc(ev.desc)+'</p><p class="twist"><b>En el equipo '+S.num+':</b> '+esc(twistOf(ev))+'</p>'+rp+extra;
+    var ta=d.querySelector('textarea');
+    if(ta){ta.value=x.d||'';ta.addEventListener('input',function(){x.d=ta.value;changed();});}
+    var ob=d.querySelector('[data-open]');
+    if(ob)ob.onclick=function(){openEventDialog(ev);};
+    box.appendChild(d);
+  });
+}
+function applyCode(){
+  var ev=matchEvent($('evCode').value),msg=$('evMsg');
+  msg.className='msg';
+  if(!ev){msg.textContent='Ese código no existe. Revísalo en la pantalla del salón.';return;}
+  msg.textContent='';$('evCode').value='';
+  $('evDlg').hidden=false;showEvStep2(ev);
+}
+$('btnApply').onclick=applyCode;
+$('evCode').addEventListener('keydown',function(e){if(e.key==='Enter')applyCode();});
+
+document.querySelectorAll('[data-go]').forEach(function(b){b.onclick=function(){show(b.getAttribute('data-go'));};});
+
+/* Misiones de rol: retos continuos que dan mejoras al producto, al pitch o a la seguridad */
+var MISSIONS=[
+ {id:'D1',role:'datos',kind:'hallazgo',type:'sql',title:'¿Quién usa la app desde el celular?',intro:'Tu equipo quiere saber cómo usa la gente el producto. Una consulta te lo dice en segundos.',
+  sql:{table:'sesiones',cols:['usuario','minutos','dispositivo'],rows:[['Ana',35,'celular'],['Luis',12,'laptop'],['Sofía',48,'celular'],['Diego',20,'tablet'],['Valeria',41,'celular'],['Mateo',15,'laptop']],sel:['usuario','minutos'],f:'dispositivo',v:'celular',task:'«Muéstrame el usuario y los minutos de las sesiones hechas desde celular.»'},
+  reward:'Casi todas las sesiones largas ocurren en celular: pensamos primero en móvil.'},
+ {id:'D2',role:'datos',kind:'hallazgo',type:'sql',title:'Pedidos que se cancelan',intro:'Algo está haciendo que se cancelen pedidos. Encuéntralos con una consulta.',
+  sql:{table:'pedidos',cols:['producto','ciudad','estado'],rows:[['Pulsera','Querétaro','entregado'],['Funda','Monterrey','cancelado'],['Cargador','Querétaro','entregado'],['Funda','Querétaro','cancelado'],['Pulsera','Monterrey','entregado'],['Funda','Monterrey','cancelado']],sel:['producto','ciudad'],f:'estado',v:'cancelado',task:'«Muéstrame el producto y la ciudad de los pedidos cancelados.»'},
+  reward:'Los pedidos cancelados se concentran en un solo producto: hay que revisar su calidad.'},
+ {id:'D3',role:'datos',kind:'hallazgo',type:'sql',title:'¿Qué les interesa a los usuarios?',intro:'Tu equipo hizo una encuesta rápida y quieres ver a quienes respondieron lo mismo.',
+  sql:{table:'encuestas',cols:['nombre','edad','interes'],rows:[['Ana',16,'deportes'],['Luis',17,'musica'],['Sofía',16,'deportes'],['Diego',18,'videojuegos'],['Valeria',17,'deportes'],['Mateo',16,'musica']],sel:['nombre','edad'],f:'interes',v:'deportes',task:'«Muéstrame el nombre y la edad de quienes respondieron que su interés son los deportes.»'},
+  reward:'Un grupo grande de jóvenes pide funciones deportivas: es una oportunidad.'},
+ {id:'D4',role:'datos',kind:'hallazgo',type:'mc',title:'Los picos de los viernes',intro:'La gráfica de uso muestra picos los viernes por la noche.',q:'¿Qué conclusión es la más razonable?',
+  opts:[{ok:true,t:'Conviene reforzar el servicio y lanzar ofertas los viernes'},{t:'Los viernes la gente odia la app',fb:'Un pico de uso no significa rechazo.'},{t:'Hay que apagar el servidor esos días',fb:'Justo cuando más te usan es cuando más debes estar disponible.'},{t:'Los datos no sirven para decidir',fb:'Los datos sirven justo para decidir mejor.'}],
+  why:'Los datos te dicen cuándo te necesitan más. Es el trabajo de Inteligencia de Negocios.',
+  reward:'Los viernes por la noche hay más uso: reforzamos el servicio ese día.'},
+ {id:'D5',role:'datos',kind:'hallazgo',type:'order',title:'El camino de un dato',intro:'Un dato no llega solo a una decisión. Ordena su recorrido.',
+  steps:['La persona usa la app','La app guarda el dato','Se limpia y se organiza','Se analiza en una gráfica','El equipo decide algo'],
+  why:'Guardar, limpiar, analizar y decidir: así funciona un equipo de datos.',
+  reward:'Decidimos con datos: desde que alguien usa la app hasta la decisión del equipo.'},
+ {id:'S1',role:'seguridad',kind:'proteccion',type:'log',title:'Detecta el cobro sospechoso',intro:'Los pagos también dejan huellas. Un robo de tarjetas suele probar montos pequeños muchas veces.',ask:'Toca la línea que NO debería estar ahí.',
+  normal:['10:02  cobro $249  tarjeta ****4412  aprobado','10:15  cobro $89   tarjeta ****1098  aprobado','10:31  cobro $120  tarjeta ****7731  aprobado','11:04  cobro $59   tarjeta ****2204  aprobado','11:20  cobro $199  tarjeta ****9157  aprobado','11:48  cobro $75   tarjeta ****3380  aprobado'],
+  bad:'03:33  cobro $1    tarjeta ****0001  intentado 300 veces en 2 minutos',hint:'Fíjate en el monto y en cuántas veces se repite.',
+  why:'Cobros de $1 repetidos cientos de veces son un ataque para probar tarjetas robadas. Se detecta con límites y alertas.',
+  reward:'Detectamos pagos sospechosos y bloqueamos intentos repetidos.'},
+ {id:'S2',role:'seguridad',kind:'proteccion',type:'cipher',title:'El mensaje cifrado',intro:'Interceptaron un mensaje con un consejo de seguridad. Gira la rueda hasta poder leerlo.',plain:'USA CONTRASENAS LARGAS Y UNICAS',
+  why:'El mensaje decía: usa contraseñas largas y únicas. Cifrar es esconder un mensaje con una regla que solo conocen quienes deben leerlo.',
+  reward:'Pedimos contraseñas largas y únicas a nuestros usuarios.'},
+ {id:'S3',role:'seguridad',kind:'proteccion',type:'mc',title:'Correo sospechoso',intro:'Una persona de tu equipo recibe un correo: «Tu cuenta se bloqueará hoy. Haz clic aquí».',q:'¿Qué haces?',
+  opts:[{ok:true,t:'No hago clic, reviso quién lo envía y entro directo al sitio oficial'},{t:'Hago clic rápido antes de que bloqueen mi cuenta',fb:'Las prisas son la herramienta favorita del phishing.'},{t:'Respondo con mi contraseña para verificar',fb:'Nunca se comparte la contraseña por correo.'},{t:'Lo reenvío a todos mis contactos',fb:'Reenviarlo ayuda a que el engaño se propague.'}],
+  why:'El phishing busca que actúes con prisa. Desconfiar y verificar es la mejor defensa.',
+  reward:'Educamos a nuestros usuarios para reconocer correos engañosos (phishing).'},
+ {id:'S4',role:'seguridad',kind:'proteccion',type:'mc',title:'Solo los datos necesarios',intro:'Tu equipo va a registrar personas en la app.',q:'¿Qué datos conviene pedir?',
+  opts:[{ok:true,t:'Solo los que realmente necesitas para dar el servicio'},{t:'Todos los que se me ocurran por si acaso',fb:'Entre más datos guardas, más riesgo y más obligaciones legales.'},{t:'Ninguno: sin registrar nada',fb:'Algunos datos sí son necesarios para que funcione.'},{t:'Los de otras personas sin avisarles',fb:'Eso incumple las leyes de protección de datos.'}],
+  why:'Pedir solo lo necesario reduce riesgos y cumple la ley. Lo ves en Legislación Informática.',
+  reward:'Solo pedimos los datos necesarios y avisamos para qué los usamos.'},
+ {id:'S5',role:'seguridad',kind:'proteccion',type:'order',title:'Respuesta a un incidente',intro:'Alguien accedió a una cuenta que no era suya. Ordena lo que hace un equipo de seguridad.',
+  steps:['Detectar el problema','Aislar la cuenta afectada','Cambiar contraseñas y accesos','Avisar a las personas afectadas','Documentar y mejorar'],
+  why:'Detectar, contener, corregir, avisar y aprender: así se maneja un incidente.',
+  reward:'Tenemos un plan de respuesta ante incidentes de seguridad.'},
+ {id:'P1',role:'pitch',kind:'argumento',type:'mc',title:'La primera frase',intro:'Un pitch se gana o se pierde en los primeros diez segundos.',q:'¿Cómo empieza un buen pitch?',
+  opts:[{ok:true,t:'Con el problema que vive una persona real'},{t:'Con la lista de tecnologías que usamos',fb:'A nadie le importa la tecnología si no entiende el problema.'},{t:'Con «hola, somos un equipo muy innovador»',fb:'Es una frase vacía que no dice nada.'},{t:'Con el precio',fb:'Primero hay que importar, luego cobrar.'}],
+  why:'Empezar con una persona y su problema atrapa la atención.',
+  reward:'Empezamos el pitch con el problema de una persona real.'},
+ {id:'P2',role:'pitch',kind:'argumento',type:'order',title:'La estructura del pitch',intro:'Un buen pitch tiene un orden que el público puede seguir.',
+  steps:['El problema','La solución','Cómo funciona','Por qué nosotros','Lo que sigue'],
+  why:'Problema, solución, cómo funciona, por qué nosotros y lo que sigue: cinco pasos claros.',
+  reward:'Contamos el pitch en cinco pasos: problema, solución, cómo funciona, por qué nosotros y lo que sigue.'},
+ {id:'P3',role:'pitch',kind:'argumento',type:'mc',title:'Solo tienes 60 segundos',intro:'El guion quedó largo y hay que recortar.',q:'¿Qué recortas primero?',
+  opts:[{ok:true,t:'Los detalles técnicos que el público no necesita'},{t:'El problema que resolvemos',fb:'Sin problema no hay pitch.'},{t:'El nombre del producto',fb:'Sin nombre nadie te recuerda.'},{t:'La conclusión',fb:'Un pitch sin cierre se queda a medias.'}],
+  why:'El público quiere entender el beneficio, no la tecnología por dentro.',
+  reward:'Hablamos de beneficios, no de detalles técnicos.'},
+ {id:'P4',role:'pitch',kind:'argumento',type:'mc',title:'Que lo recuerden',intro:'Después de diez pitches, el público solo recuerda unos cuantos.',q:'¿Qué hace más memorable un pitch?',
+  opts:[{ok:true,t:'Una historia corta con un ejemplo concreto'},{t:'Hablar rápido para decir más cosas',fb:'Si vas rápido, no se entiende.'},{t:'Leer el guion sin mirar al público',fb:'Conectar con el público importa.'},{t:'Usar muchas palabras técnicas',fb:'Las palabras técnicas alejan.'}],
+  why:'Las historias con un ejemplo concreto se quedan en la memoria.',
+  reward:'Contamos una historia corta con un ejemplo concreto.'},
+ {id:'P5',role:'pitch',kind:'argumento',type:'log',title:'Detecta la frase vacía',intro:'Este borrador de guion tiene una frase que no dice nada. Los jurados las detectan al instante.',ask:'Toca la frase vacía.',
+  normal:['Cada semana, miles de estudiantes pierden tareas por no organizarse.','Nuestra app les recuerda cada entrega en su celular.','En las pruebas, 8 de 10 personas entregaron a tiempo.','Empezamos en prepas y seguiremos con universidades.'],
+  bad:'Somos innovadores, disruptivos y revolucionamos todo.',hint:'Busca la frase que podría decir cualquier equipo.',
+  why:'Una frase que podría decir cualquiera no convence. Los datos y los ejemplos sí.',
+  reward:'Evitamos frases vacías y damos datos concretos.'},
+ {id:'S6',role:'seguridad',kind:'proteccion',type:'stream',title:'Filtra el tráfico web',intro:'Tu página recibe visitas todo el tiempo. Un firewall revisa cada petición y bloquea las peligrosas.',ask:'Llega tráfico a la página. Toca las peticiones peligrosas antes de que pasen.',
+  good:['GET  /inicio  desde Querétaro','GET  /catalogo  desde Monterrey','POST  /registro  persona nueva','GET  /ayuda  desde Guadalajara','GET  /precios  desde Puebla','POST  /contacto  mensaje normal'],
+  bad:["POST  /registro  texto: ' OR 1=1 --",'GET  /admin  intentado 40 veces desde una IP','POST  /archivos  sube un programa .exe','GET  /../../etc/passwd  recorrido de carpetas','POST  /login  1,000 intentos por minuto'],
+  total:16,badCount:6,need:5,maxFalse:2,
+  why:'Un firewall bloquea la inyección de código, el recorrido de carpetas y los intentos masivos de entrada. Se estudia en Seguridad Informática y en Redes.',
+  reward:'Un firewall filtra el tráfico y bloquea las peticiones peligrosas.'},
+ {id:'S7',role:'seguridad',kind:'proteccion',type:'pin',title:'El PIN de 4 dígitos',intro:'Una caja fuerte digital se abre con un PIN. ¿Qué tan fácil es adivinarlo?',ask:'El PIN tiene 4 dígitos, todos distintos. Cada intento te dice cuántos dígitos están en su lugar y cuántos están en otro lugar. Averigua el PIN.',digits:4,
+  why:'Un PIN de 4 dígitos tiene solo 10,000 combinaciones y un programa las prueba en segundos. Por eso se usan contraseñas largas y verificación en dos pasos.',
+  reward:'Usamos verificación en dos pasos porque un PIN corto se adivina rápido.'},
+ {id:'S8',role:'seguridad',kind:'proteccion',type:'pass',title:'Contraseña a prueba de robots',intro:'Las contraseñas débiles se adivinan en segundos. Aprende cómo se ve una buena.',ask:'Crea una contraseña de práctica que cumpla todas las reglas.',
+  why:'Una contraseña larga y mezclada tarda siglos en adivinarse; una corta, segundos. Ayuda usar un gestor de contraseñas y la verificación en dos pasos.',
+  reward:'Mostramos un medidor de seguridad cuando alguien crea su contraseña.'},
+ {id:'S9',role:'seguridad',kind:'proteccion',type:'phish',title:'Caza las señales falsas',intro:'Les llegó un mensaje que pide entrar a un enlace. Hay que revisarlo como lo haría un equipo de seguridad.',ask:'Revisa el mensaje.',
+  messages:[
+   {parts:[
+    {id:'de',label:'De:',text:'Soporte Banco <soporte@banc0-seguro.com>',flag:true,why:'El dominio tiene un cero en lugar de la letra o.'},
+    {id:'asunto',label:'Asunto:',text:'URGENTE: tu cuenta será bloqueada en 24 horas',flag:true,why:'Meter prisa es la táctica favorita del engaño.'},
+    {id:'saludo',label:'Saludo:',text:'Hola, Ana:',flag:false,fb:'Un saludo con tu nombre no es una señal de engaño.'},
+    {id:'enlace',label:'Enlace:',text:'http://verifica-tu-cuenta.xyz/entrar',flag:true,why:'El enlace no lleva al sitio oficial: termina en .xyz.'},
+    {id:'adjunto',label:'Adjunto:',text:'factura_marzo.pdf.exe',flag:true,why:'Un “pdf” que termina en .exe es un programa, no un documento.'},
+    {id:'firma',label:'Firma:',text:'Atentamente, el equipo de soporte',flag:false,fb:'Una firma por sí sola no dice nada.'}]},
+   {parts:[
+    {id:'de',label:'De:',text:'Envíos Express <avisos@envios-express.top>',flag:true,why:'Termina en .top, un dominio barato que usan los estafadores.'},
+    {id:'asunto',label:'Asunto:',text:'Tu paquete está detenido: paga $19 hoy',flag:true,why:'Piden un pago urgente por mensaje.'},
+    {id:'guia',label:'Guía:',text:'Número de guía: EX-482913',flag:false,fb:'Un número de guía es normal en una paquetería real.'},
+    {id:'enlace',label:'Enlace:',text:'http://bit.ly/3xYzPago',flag:true,why:'Los enlaces acortados esconden a dónde llevan.'},
+    {id:'texto',label:'Mensaje:',text:'Si no pagas hoy, devolveremos tu paquete y perderás el envío.',flag:true,why:'Las amenazas con tiempo límite son una señal de engaño.'},
+    {id:'firma',label:'Firma:',text:'Gracias por tu preferencia',flag:false,fb:'Una despedida amable no dice nada.'}]}
+  ],
+  why:'Los engaños de este tipo se delatan por el dominio, la prisa, los enlaces y los adjuntos extraños. Revisar antes de hacer clic es la mejor defensa.',
+  reward:'Mostramos una advertencia cuando un enlace parece sospechoso.'}
+
+];
+function mIndex(id){for(var i=0;i<MISSIONS.length;i++){if(MISSIONS[i].id===id)return i;}return 0;}
+function mKey(id){var i=mIndex(id);return WORDS[(S.num*7+i*3)%WORDS.length]+'-'+(((S.num*13+i*9)%80)+20);}
+function missionOwner(m){
+  var roles=SIZES[S.size]||SIZES[1];
+  if(roles.indexOf(m.role)!==-1)return m.role;
+  if(roles.indexOf('tecnico')!==-1)return 'tecnico';
+  if(m.role==='pitch'&&roles.indexOf('datos')!==-1)return 'datos';
+  return null;
+}
+function missionsFor(role){return MISSIONS.filter(function(m){return missionOwner(m)===role;});}
+function availableMissions(){return MISSIONS.filter(function(m){return !!missionOwner(m);});}
+function msState(id){if(!S.ms[id])S.ms[id]={done:false,w:{}};if(!S.ms[id].w)S.ms[id].w={};return S.ms[id];}
+function matchMissionKey(k){var av=availableMissions(),i;for(i=0;i<av.length;i++){if(nk(mKey(av[i].id))===k)return av[i];}return null;}
+function installedRewards(kind){return MISSIONS.filter(function(m){return S.upg[m.id]&&m.kind===kind;}).map(function(m){return m.reward;});}
+function findsList(){return installedRewards('hallazgo');}
+function protList(){return installedRewards('proteccion');}
+function pitchArgs(){return installedRewards('argumento');}
+function sqlSpecMission(m){
+  var d=m.sql,rows=d.rows.map(function(r){var o={};d.cols.forEach(function(c,i){o[c]=r[i];});return o;});
+  return {table:d.table,cols:d.cols,rows:rows,sel:d.sel,f:d.f,v:d.v,task:d.task};
+}
+function cipherWidget(body,m,st,key,idx,finished){
+  var w=st.w,shift=((S.num*3+idx*5)%23)+2,cipher=shiftText(m.plain,shift);
+  if(w.s==null)w.s=0;
+  function draw(){
+    if(st.done){body.innerHTML=keyPanel(key,m.why,m.klabel);return;}
+    var dec=shiftText(cipher,-w.s);
+    body.innerHTML='<p class="lead" style="margin-bottom:6px">Mensaje cifrado</p><pre class="term big">'+esc(cipher)+'</pre>'+
+      '<div class="wheel"><button class="btn" data-m="1" aria-label="Girar una letra menos" type="button">−</button><output>'+w.s+'</output><button class="btn" data-p="1" aria-label="Girar una letra más" type="button">+</button><span class="lead" style="margin:0">lugares hacia atrás</span></div>'+
+      '<p class="lead" style="margin-bottom:6px">Mensaje descifrado</p><pre class="term big">'+esc(dec)+'</pre>';
+    body.querySelector('[data-m]').onclick=function(){w.s=(w.s+25)%26;save();draw();};
+    body.querySelector('[data-p]').onclick=function(){w.s=(w.s+1)%26;save();draw();};
+    if(dec===m.plain){finished();draw();}
+  }
+  draw();
+}
+function renderMission(host,m){
+  var st=msState(m.id),idx=mIndex(m.id),key=mKey(m.id);
+  host.innerHTML='<p class="lead">'+esc(m.intro)+'</p><div class="mbody"></div>';
+  var body=host.querySelector('.mbody');
+  function finished(){st.done=true;save();toast('Misión completada. Dicta el código a Producto.');renderNav();setTimeout(renderMissionList,0);}
+  var cfg=Object.assign({},m,{klabel:'CÓDIGO DE MEJORA'});
+  if(m.type==='sql'){var sp=sqlSpecMission(m);sp.key=key;sp.keyLabel='CÓDIGO DE MEJORA';sp.to='Producto';if(st.done)st.w.solved=true;sqlWidget(body,sp,st.w,finished);}
+  else runWidget(m.type,body,cfg,st,key,idx,finished);
+}
+var misOpen=null;
+function renderMissionList(){
+  var host=$('misHost');if(!host)return;
+  var list=missionsFor(S.role);
+  host.innerHTML='';
+  if(!list.length){host.innerHTML='<p class="lead">Tu equipo no tiene misiones para tu rol.</p>';return;}
+  var done=list.filter(function(m){return msState(m.id).done;}).length;
+  var head=document.createElement('p');head.className='lead';head.textContent='Misiones completadas: '+done+' de '+list.length+'.';host.appendChild(head);
+  var kinds={hallazgo:'Hallazgo para el producto',proteccion:'Protección para el producto',argumento:'Argumento para el pitch'};
+  list.forEach(function(m){
+    var st=msState(m.id),card=document.createElement('div');
+    card.className='mis'+(st.done?' done':'');
+    card.innerHTML='<button type="button" class="mh" aria-expanded="'+(misOpen===m.id?'true':'false')+'"><span><b>'+esc(m.title)+'</b><small>'+esc(kinds[m.kind])+'</small></span><span class="ms">'+(st.done?'Completada':'Pendiente')+'</span></button><div class="mb"'+(misOpen===m.id?'':' hidden')+'></div>';
+    card.querySelector('.mh').onclick=function(){misOpen=(misOpen===m.id)?null:m.id;renderMissionList();};
+    host.appendChild(card);
+    if(misOpen===m.id)renderMission(card.querySelector('.mb'),m);
+  });
+}
+function renderMejoras(){
+  var host=$('mjList');if(!host)return;
+  var av=availableMissions(),inst=av.filter(function(m){return S.upg[m.id];});
+  var h='<p class="lead">Mejoras instaladas: <b>'+inst.length+'</b> de '+av.length+'.</p>';
+  if(!av.length)h='<p class="lead">Tu equipo no tiene compañeros con misiones, así que no hay mejoras que instalar.</p>';
+  else if(!inst.length)h+='<p class="lead">Todavía no han instalado ninguna. Pídeles a tus compañeros que completen misiones.</p>';
+  var labels={hallazgo:'Hallazgo',proteccion:'Protección',argumento:'Argumento'};
+  inst.forEach(function(m){h+='<div class="evcard ayuda"><div class="evh"><span class="tag">'+labels[m.kind]+'</span><b>'+esc(m.title)+'</b></div><p>'+esc(m.reward)+'</p></div>';});
+  host.innerHTML=h;
+}
+function applyMission(m){
+  if(S.upg[m.id]){toast('Esa mejora ya estaba instalada.');return;}
+  S.upg[m.id]=true;save();renderMejoras();changed();
+  toast('Mejora instalada: '+m.title);
+}
+function installFromInput(){
+  var k=nk($('mjCode').value),msg=$('mjMsg'),m=matchMissionKey(k);
+  msg.className='msg';
+  if(m){$('mjCode').value='';applyMission(m);msg.className='msg ok';msg.textContent='Mejora instalada: '+m.reward;}
+  else{msg.textContent='Ese código no corresponde a una misión de tu equipo. '+quip('lock');}
+}
+
+/* Evento rápido: botón flotante y diálogo */
+function matchEvent(raw){
+  var k=String(raw||'').toUpperCase().replace(/[^A-Z0-9]/g,''),i,n;
+  if(!k)return null;
+  for(i=0;i<EVENTS.length;i++){if(EVENTS[i].c.replace('-','')===k)return EVENTS[i];}
+  if(/^\d{1,2}$/.test(k)){n=parseInt(k,10);for(i=0;i<EVENTS.length;i++){if(parseInt(EVENTS[i].c.slice(3),10)===n)return EVENTS[i];}}
+  if(/^[A-Z]{2}$/.test(k)){for(i=0;i<EVENTS.length;i++){if(EVENTS[i].c.slice(0,2)===k)return EVENTS[i];}}
+  return null;
+}
+var quickTimer=null,toastTimer=null;
+function toast(m){var el=$('toast');el.textContent=m;el.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(function(){el.hidden=true;},3800);}
+function updateEvBadge(){
+  var n=0,b=$('evBadge'),word;
+  if(isCaptain()){n=S.events.filter(function(e){return !t(e.d);}).length;word=n===1?' pendiente':' pendientes';}
+  else{
+    n=S.events.filter(function(e){var ev=evByCode(e.c);return ev&&respRole(ev)===S.role&&EV_CH[e.c]&&!(S.ch[e.c]&&S.ch[e.c].done);}).length;
+    word=n===1?' desafío':' desafíos';
+  }
+  b.hidden=!n;b.textContent=n+word;
+}
+function showEvStep1(){
+  $('evStep1').hidden=false;$('evStep2').hidden=true;$('evQuick').value='';$('evQuickMsg').textContent='';
+  $('evQuick').focus();
+  setTimeout(function(){$('evQuick').focus();},60);
+}
+function openEvDlg(){$('evDlg').hidden=false;showEvStep1();}
+function closeEvDlg(){$('evDlg').hidden=true;clearTimeout(quickTimer);}
+function upsertEvent(ev,d){
+  var idx=-1,i;
+  for(i=0;i<S.events.length;i++){if(S.events[i].c===ev.c){idx=i;break;}}
+  if(idx===-1){S.events.push({c:ev.c,d:d===null?'':d});idx=S.events.length-1;}
+  else if(d!==null){S.events[idx].d=d;}
+  renderEvents();changed();
+  return idx;
+}
+function showEvStep2(ev){
+  $('evStep1').hidden=true;$('evStep2').hidden=false;
+  var cap=isCaptain(),roles=(SIZES[S.size]||SIZES[1]).slice(),ex=null,i;
+  for(i=0;i<S.events.length;i++){if(S.events[i].c===ev.c){ex=S.events[i];break;}}
+  if(!cap){roles=[S.role].concat(roles.filter(function(r){return r!==S.role;}));}
+  var rp='<ul class="rp">'+roles.map(function(r){return '<li><b>'+esc(ROLES[r].name)+(r===S.role?' (tú)':'')+':</b> '+esc(ROLES[r].ask)+'</li>';}).join('')+'</ul>';
+  var h='<div class="evcard '+ev.t+'" style="margin:0 0 14px"><div class="evh"><span class="tag">'+(ev.t==='ayuda'?'Ayuda':'Perjudica')+'</span><b>'+esc(ev.title)+'</b></div><p>'+esc(ev.desc)+'</p><p class="twist"><b>En el equipo '+S.num+':</b> '+esc(twistOf(ev))+'</p>'+rp+'</div>';
+  var resp=respRole(ev),cfg=EV_CH[ev.c],mine=!cap&&resp&&resp===S.role&&!!cfg,locked=cap&&resp&&!evUnlocked(ev);
+  if(cap&&locked){
+    h+='<div class="lockev"><p><b>Para decidir necesitas la clave de este evento.</b> La tiene el rol <b>'+esc(ROLES[resp].name)+'</b>: tiene que resolver su desafío y dictártela en voz alta.</p>'+
+       '<div class="codeinput"><input type="text" id="evKeyIn" placeholder="NOVA-42" maxlength="16" autocomplete="off" aria-label="Clave del evento"><button type="button" class="btn primary" id="evKeyBtn">Desbloquear</button></div><p class="msg" id="evKeyMsg" role="status" aria-live="polite"></p></div>'+
+       '<div class="bar2" style="margin-top:0"><button id="evLater" class="btn" type="button">Decidir después</button><button id="evWrong" class="btn" type="button">No es este evento</button></div>';
+  }else if(cap){
+    h+='<label class="field"><span>'+esc(ev.ask)+'</span><textarea id="evDec" rows="3" placeholder="Escriban la decisión del equipo"></textarea></label><p id="evDecMsg" class="msg" role="status" aria-live="polite"></p>'+
+       '<div class="bar2" style="margin-top:0"><button id="evSave" class="btn primary" type="button">Guardar decisión</button><button id="evLater" class="btn" type="button">Decidir después</button><button id="evWrong" class="btn" type="button">No es este evento</button></div>';
+  }else if(mine){
+    h+='<div id="chHost"></div><div class="bar2"><button id="evOk" class="btn primary" type="button">Cerrar</button><button id="evWrong" class="btn" type="button">No es este evento</button></div>';
+  }else{
+    h+=(resp&&cfg?'<p class="lead">El desafío de este evento le toca a <b>'+esc(ROLES[resp].name)+'</b>. Ayúdale a pensar: ¿qué ves tú desde tu rol?</p>':'<p class="lead">Este evento no tiene desafío para tu equipo. Piensen juntos qué decisión tomar.</p>')+
+       '<div class="bar2" style="margin-top:0"><button id="evOk" class="btn primary" type="button">Entendido</button><button id="evWrong" class="btn" type="button">No es este evento</button></div>';
+  }
+  $('evStep2').innerHTML=h;
+  $('evWrong').onclick=showEvStep1;
+  if(cap&&locked){
+    var tryKey=function(){
+      var v=nk($('evKeyIn').value);
+      if(v&&(v===nk(evKey(ev.c))||v===nk(MASTER))){S.evOk[ev.c]=true;save();upsertEvent(ev,null);showEvStep2(ev);}
+      else{$('evKeyMsg').textContent='Esa clave no coincide. '+quip('lock');}
+    };
+    $('evKeyBtn').onclick=tryKey;
+    $('evKeyIn').addEventListener('keydown',function(e){if(e.key==='Enter')tryKey();});
+    setTimeout(function(){$('evKeyIn').focus();},60);
+    $('evLater').onclick=function(){upsertEvent(ev,null);closeEvDlg();toast('Evento guardado. Falta la clave y la decisión.');};
+  }else if(cap){
+    var ta=$('evDec');ta.value=ex?(ex.d||''):'';setTimeout(function(){ta.focus();},60);
+    $('evSave').onclick=function(){
+      var val=t(ta.value);
+      if(!val){$('evDecMsg').textContent='Escribe la decisión del equipo o toca "Decidir después".';return;}
+      var idx=upsertEvent(ev,val);closeEvDlg();toast('Listo: se creó la versión v1.'+(idx+1)+' de su producto.');
+    };
+    $('evLater').onclick=function(){upsertEvent(ev,null);closeEvDlg();toast('Evento guardado. Falta escribir la decisión.');};
+  }else{
+    if(mine){renderChallenge($('chHost'),ev);}
+    $('evOk').onclick=function(){upsertEvent(ev,null);closeEvDlg();toast('Evento guardado.');};
+  }
+}
+function quickError(){$('evQuickMsg').textContent='Ese código no existe. Revisa la pantalla del salón.';}
+$('evFab').onclick=openEvDlg;
+$('evX').onclick=closeEvDlg;
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!$('evDlg').hidden)closeEvDlg();});
+$('evQuick').addEventListener('input',function(){
+  clearTimeout(quickTimer);
+  var k=$('evQuick').value.toUpperCase().replace(/[^A-Z0-9]/g,'');
+  $('evQuickMsg').textContent='';
+  if(!k)return;
+  if(k==='REINICIO'||k==='REINICIAR'||k==='RESET'){$('evQuick').value='';resetAll();return;}
+  var mm=matchMissionKey(k);
+  if(mm){
+    if(isCaptain()){$('evQuick').value='';closeEvDlg();applyMission(mm);}
+    else{$('evQuickMsg').textContent='Ese es un código de mejora: díctaselo a Producto.';}
+    return;
+  }
+  var full=null,i;
+  for(i=0;i<EVENTS.length;i++){if(EVENTS[i].c.replace('-','')===k)full=EVENTS[i];}
+  if(full||/^\d{2}$/.test(k)){var ev=full||matchEvent(k);if(ev)showEvStep2(ev);else quickError();return;}
+  if(/^\d$/.test(k)){quickTimer=setTimeout(function(){var e2=matchEvent($('evQuick').value);if(e2)showEvStep2(e2);else quickError();},800);return;}
+  if(k.length>=9)quickError();
+});
+$('evQuick').addEventListener('keydown',function(e){
+  if(e.key!=='Enter')return;
+  clearTimeout(quickTimer);
+  var kk=$('evQuick').value.toUpperCase().replace(/[^A-Z0-9]/g,'');
+  if(kk==='REINICIO'||kk==='REINICIAR'||kk==='RESET'){$('evQuick').value='';resetAll();return;}
+  var mm2=matchMissionKey(kk);
+  if(mm2){if(isCaptain()){$('evQuick').value='';closeEvDlg();applyMission(mm2);}else{$('evQuickMsg').textContent='Ese es un código de mejora: díctaselo a Producto.';}return;}
+  var ev=matchEvent($('evQuick').value);if(ev)showEvStep2(ev);else quickError();
+});
+
+/* Entrega */
+function copyFrom(id){
+  var ta=$(id),m=$('copyMsg'),ok=false;
+  function fallback(){ta.focus();ta.select();try{ok=document.execCommand('copy');}catch(e){ok=false;}m.className=ok?'msg ok':'msg';m.textContent=ok?'Copiado.':'No se pudo copiar. Selecciona el texto y usa Ctrl+C.';}
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(ta.value).then(function(){m.className='msg ok';m.textContent='Copiado.';},fallback);
+  }else{fallback();}
+}
+document.querySelectorAll('[data-copy]').forEach(function(b){b.onclick=function(){copyFrom(b.getAttribute('data-copy'));};});
+$('oPitch').addEventListener('input',updateCount);
+$('btnRefresh').onclick=function(){fillOutputs();$('copyMsg').className='msg ok';$('copyMsg').textContent='Textos actualizados.';};
+function slug(s){return t(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');}
+$('btnDownload').onclick=function(){
+  var blob=new Blob([buildDoc()],{type:'text/html'}),a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download=(slug(S.name)||'mi-startup')+'.html';
+  document.body.appendChild(a);a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},500);
+};
+
+/* Pantalla de inicio: equipo, tamaño y rol */
+var sel={num:S.num||1,size:S.size||0,role:S.role||''};
+function renderStart(){
+  var sn=$('stNum');
+  if(!sn.options.length){for(var i=1;i<=12;i++){var o=document.createElement('option');o.value=String(i);o.textContent='Equipo '+i;sn.appendChild(o);}}
+  sn.value=String(sel.num);
+  var sz=$('stSize');sz.innerHTML='';
+  [1,2,3,4].forEach(function(n){
+    var lab=document.createElement('label');lab.className='opt';
+    var inp=document.createElement('input');inp.type='radio';inp.name='size';inp.value=String(n);inp.checked=sel.size===n;
+    inp.addEventListener('change',function(){sel.size=n;if(SIZES[n].indexOf(sel.role)===-1)sel.role='';renderStart();});
+    var sp=document.createElement('span');sp.textContent=n===1?'1 persona':n+' personas';
+    lab.appendChild(inp);lab.appendChild(sp);sz.appendChild(lab);
+  });
+  var rb=$('stRole');rb.innerHTML='';
+  if(!sel.size){rb.innerHTML='<p class="lead" style="margin:0">Primero elige cuántas personas son.</p>';return;}
+  SIZES[sel.size].forEach(function(r){
+    var lab=document.createElement('label');lab.className='opt';
+    var inp=document.createElement('input');inp.type='radio';inp.name='role';inp.value=r;inp.checked=sel.role===r;
+    inp.addEventListener('change',function(){sel.role=r;});
+    var sp=document.createElement('span');sp.innerHTML='<b>'+esc(ROLES[r].name)+'</b><small>'+esc(ROLES[r].desc)+'</small>';
+    lab.appendChild(inp);lab.appendChild(sp);rb.appendChild(lab);
+  });
+}
+$('stNum').addEventListener('change',function(){sel.num=parseInt($('stNum').value,10)||1;});
+$('stGo').onclick=function(){
+  var m=$('stMsg');
+  if(!sel.size){m.textContent='Elige cuántas personas son en tu equipo.';return;}
+  if(!sel.role){m.textContent='Elige tu rol.';return;}
+  m.textContent='';
+  if(S.joined&&S.num!==sel.num){S.unlocked=[];S.solved={datos:false,seg:false,pitch:false};S.shift=0;S.pz=null;S.sqlText='';S.layout='';S.deploy={tries:0,errors:0,chaosFixed:false,ok:false,hist:[]};}
+  S.num=sel.num;S.size=sel.size;S.role=sel.role;S.joined=true;save();
+  $('start').hidden=true;applyRole();
+};
+$('btnChange').onclick=function(){sel={num:S.num||1,size:S.size||0,role:S.role||''};$('stMsg').textContent='';renderStart();$('start').hidden=false;};
+
+function applyRole(){
+  var cap=isCaptain();
+  $('app').classList.toggle('comp',!cap);
+  $('prog').hidden=!cap;$('jump').hidden=!cap;
+  $('whoText').textContent='Equipo '+S.num+', '+S.size+(S.size===1?' persona':' personas')+'. Rol: '+ROLES[S.role].name+'.';
+  renderLocks();renderEvents();renderSqlPanel();renderMissionList();renderMejoras();renderCipher();renderPz();renderR();renderLayouts();renderScore();
+  $('ideaHint').textContent='Tu idea: '+ideaLine();
+  show(cap?'idea':navFor()[0].id);
+}
+
+/* Reiniciar todo (botón o código REINICIO) */
+function resetAll(){
+  if(!window.confirm('¿Reiniciar todo en este dispositivo? Se borra el avance y vuelve a la pantalla de inicio.'))return;
+  try{localStorage.removeItem(KEY);}catch(e){}
+  window.location.reload();
+}
+$('btnClear').onclick=resetAll;
+$('mjBtn').onclick=installFromInput;
+$('mjCode').addEventListener('keydown',function(e){if(e.key==='Enter')installFromInput();});
+$('btnResetAll').onclick=resetAll;
+$('stReset').onclick=resetAll;
+
+buildLocks();
+if(S.joined&&S.role&&ROLES[S.role]&&SIZES[S.size]){applyRole();}
+else{renderStart();$('start').hidden=false;}
+})();
+</script>
+</body>
+</html>
